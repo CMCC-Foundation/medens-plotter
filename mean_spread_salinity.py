@@ -76,7 +76,7 @@ if __name__ == "__main__":
         d2 = "%s:%s" % (hour, minu)
         d3 = "%s, %s" % (d1, d2)
         d4 = "%s_%s%s" % (d1, hour, minu)
-        
+                
         # iterate over depth
         for d in ds1.deptht.values:
             
@@ -86,16 +86,16 @@ if __name__ == "__main__":
                            urcrnrlon=lons[-1],urcrnrlat=lats[-1])
             
             # contourf STD
-            std_data =  ds1.votemper[0,0,:,:].values
+            std_data =  ds1.vosaline[0,0,:,:].values
             std_colormesh = bmap.contourf(xxx, yyy, std_data, cmap='Purples', levels=10, vmin=std_data.min(), vmax=std_data.max())
 
             # contour MEAN
             # contour
-            mean_data =  ds2.votemper[0,0,:,:].values
-            mean_colormesh = bmap.contour(xxx, yyy, mean_data, cmap='jet', levels=50, linewidths=0.3, vmin=10, vmax=mean_data.max())
+            mean_data =  ds2.vosaline[0,0,:,:].values
+            mean_colormesh = bmap.contour(xxx, yyy, mean_data, cmap='jet', levels=50, linewidths=0.3, vmin=mean_data.min(), vmax=mean_data.max())
             
             # title
-            plt.title("Ensemble spread for Sea temperature at %s m.\nTimestep: %s" % (np.round(d, decimals=2), d3), fontsize = 8)
+            plt.title("Ensemble mean and spread for salinity at %s m.\nTimestep: %s" % (np.round(d, decimals=2), d3), fontsize = 8)
             
             # colorbar STD
             std_cb = bmap.colorbar(std_colormesh, location='bottom')
@@ -105,20 +105,19 @@ if __name__ == "__main__":
 
             # colorbar MEAN
             mean_cb = bmap.colorbar(mean_colormesh, location='right')
-            mean_cb.set_label("Mean Temperature (degC)", fontsize=6)
+            mean_cb.set_label("Mean salinity (psu)", fontsize=6)
             for t in mean_cb.ax.get_yticklabels():
                 t.set_fontsize(6)
-
                 
             # draw coastlines, country boundaries, fill continents.
             bmap.drawcoastlines(linewidth=0.25)
             bmap.fillcontinents(color='white')
-            
+                
             # show
             #plt.show()
 
             # save file
             di = ds1.deptht.values.tolist().index(d)
-            filename = "output/ens_mean_spread_Temperature_%s_depth%s.png" % (d4, di)
+            filename = "output/ens_mean_spread_Salinity_%s_depth%s.png" % (d4, di)
             plt.savefig(filename, dpi=300, bbox_inches="tight")
             print("File %s generated" % filename)
