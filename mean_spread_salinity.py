@@ -123,6 +123,7 @@ if __name__ == "__main__":
     xxx, yyy = meshgrid(lons, lats)
 
     # iterate over the timestamps
+    timestep_index = 0
     for t in ds1.time.values:
 
         d1 = str(t).split("T")[0]        
@@ -131,8 +132,9 @@ if __name__ == "__main__":
         d2 = "%s:%s" % (hour, minu)
         d3 = "%s, %s" % (d1, d2)
         d4 = "%s_%s%s" % (d1, hour, minu)
-                
+    
         # iterate over depth
+        depth_index = 0
         for d in ds1.depth.values:
             
             # initialise the map
@@ -147,13 +149,14 @@ if __name__ == "__main__":
             ############################################
             
             # contour MEAN
-            mean_data_0 =  ds2.vosaline[0,0,:,:]
+            meanLevelsContour = linspace(meanMinValue, meanMaxValue, num=meanLevels)            
+            mean_data_0 =  ds2.vosaline[timestep_index,depth_index,:,:]
             mean_data_1 = mean_data_0.where(mean_data_0 >= meanMinValue).where(mean_data_0 <= meanMaxValue)
             mean_data = mean_data_1.values            
-            mean_colormesh = bmap.contour(xxx, yyy, mean_data, cmap=meanColorMap, levels=meanLevels, linewidths=0.3)
+            mean_colormesh = bmap.contour(xxx, yyy, mean_data, cmap=meanColorMap, levels=meanLevelsContour, linewidths=0.3, vmin=meanMinValue, vmax=meanMaxValue)
             
             # colorbar MEAN
-            meanTicks = range(int(meanMinValue), int(meanMaxValue))
+            meanTicks = range(int(meanMinValue), int(meanMaxValue)+1)
             mean_cb = bmap.colorbar(mean_colormesh, ticks=meanTicks, location="right")
             mean_cb.set_label("Mean salinity (psu)", fontsize=5)
             for t in mean_cb.ax.get_yticklabels():
@@ -166,13 +169,15 @@ if __name__ == "__main__":
             ############################################
 
             # contourf STD
-            std_data_0 =  ds1.vosaline[0,0,:,:]
+            stdLevelsContourf = linspace(stdMinValue, stdMaxValue, num=stdLevels)
+            std_data_0 =  ds1.vosaline[timestep_index,depth_index,:,:]
             std_data_1 = std_data_0.where(std_data_0 >= stdMinValue).where(std_data_0 <= stdMaxValue)
             std_data = std_data_1.values
-            std_colormesh = bmap.contourf(xxx, yyy, std_data, cmap=stdColorMap, levels=stdLevels, vmin=stdMinValue, vmax=stdMaxValue)
+            std_colormesh = bmap.contourf(xxx, yyy, std_data, cmap=stdColorMap, levels=stdLevelsContourf, vmin=stdMinValue, vmax=stdMaxValue)
 
             # colorbar STD
-            std_cb = bmap.colorbar(std_colormesh, location='bottom', aspect=3)
+            stdTicks = numpy.arange(stdMinValue, stdMaxValue+0.1, 0.1)
+            std_cb = bmap.colorbar(std_colormesh, location='bottom', ticks = stdTicks)
             std_cb.set_label("Spread", fontsize=5)
             for t in std_cb.ax.get_xticklabels():
                 t.set_fontsize(5)
@@ -196,7 +201,10 @@ if __name__ == "__main__":
             filename = "output/ens_mean_spread_Salinity_%s_depth%s.png" % (d4, di)
             plt.savefig(filename, dpi=300, bbox_inches="tight")
             print("File %s generated" % filename)
-
-            break
-
-        break
+            plt.clf()
+            
+            # increment depth_index
+            depth_index += 1
+            
+        # increment timestep index
+        timestep_index += 1
