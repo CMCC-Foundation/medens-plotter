@@ -33,12 +33,6 @@ appname = "PlotSalinity"
 
 ###############################################
 #
-# chart config
-#
-###############################################
-
-###############################################
-#
 # main
 #
 ###############################################
@@ -100,6 +94,13 @@ if __name__ == "__main__":
     print("[%s] -- Std min value set to: %s" % (appname, stdMinValue))
     print("[%s] -- Std max value set to: %s" % (appname, stdMaxValue))
     print("[%s] -- Resolution set to: %s" % (appname, resolution))
+
+    
+    ###############################################
+    #
+    # start processing
+    #
+    ###############################################
     
     # open dataset STD    
     ds1 = xarray.open_dataset(stdFile)
