@@ -10,6 +10,7 @@ from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
 from numpy import meshgrid
 from numpy import linspace
+import configparser
 import numpy as np
 import traceback
 import datetime
@@ -18,7 +19,7 @@ import numpy
 import math
 import pdb
 import sys
-
+import os
 
 
 ###############################################
@@ -27,7 +28,7 @@ import sys
 #
 ###############################################
 
-appname = "MeanSpread"
+appname = "PlotSalinity"
 
 
 ###############################################
@@ -44,22 +45,76 @@ appname = "MeanSpread"
 
 if __name__ == "__main__":
 
-    # open dataset STD
-    inputFile1 = "input/REG_medens_sdt_T.nc"
-    ds1 = xarray.open_dataset(inputFile1)
+    ###############################################
+    #
+    # read input parameters
+    #
+    ###############################################    
+    
+    # read config file name
+    configFile = None
+    try:
+        configFile = sys.argv[1]
+    except:
+        print("[ERROR] -- Config file not provided!")
+        sys.exit(1)
+
+    # read date
+    inputDate = None
+    try:
+        inputDate = sys.argv[2]
+    except:
+        inputDate = datetime.datetime.today().strftime("%Y%m%d")
+
+        
+    ###############################################
+    #
+    # parse config file
+    #
+    ###############################################
+        
+    configParser = configparser.ConfigParser()
+    configParser.read(configFile)
+
+    # paths
+    basePath = configParser.get("default", "basePath")
+    meanFile = os.path.join(basePath, inputDate, configParser.get("salinity", "meanFile"))
+    stdFile = os.path.join(basePath, inputDate, configParser.get("salinity", "stdFile"))
+    print("[%s] -- Mean file set to: %s" % (appname, meanFile))
+    print("[%s] -- Std file set to: %s" % (appname, stdFile))
+    
+    # chart details
+    meanColorMap = configParser.get("salinity", "meanColorMap")
+    meanMinValue = configParser.getfloat("salinity", "meanMinValue")
+    meanMaxValue = configParser.getfloat("salinity", "meanMaxValue")
+    meanLevels = configParser.getint("salinity", "meanLevels")
+    stdColorMap = configParser.get("salinity", "stdColorMap")
+    stdMinValue = configParser.getfloat("salinity", "stdMinValue")
+    stdMaxValue = configParser.getfloat("salinity", "stdMaxValue")
+    stdLevels = configParser.getint("salinity", "stdLevels")    
+    resolution = configParser.get("salinity", "resolution")
+    print("[%s] -- Mean color map set to: %s" % (appname, meanColorMap))
+    print("[%s] -- Mean min value set to: %s" % (appname, meanMinValue))
+    print("[%s] -- Mean max value set to: %s" % (appname, meanMaxValue))
+    print("[%s] -- Std color map set to: %s" % (appname, stdColorMap))
+    print("[%s] -- Std min value set to: %s" % (appname, stdMinValue))
+    print("[%s] -- Std max value set to: %s" % (appname, stdMaxValue))
+    print("[%s] -- Resolution set to: %s" % (appname, resolution))
+    
+    # open dataset STD    
+    ds1 = xarray.open_dataset(stdFile)
 
     # open dataset MEAN
-    inputFile2 = "input/REG_medens_mean_T.nc"
-    ds2 = xarray.open_dataset(inputFile2)
+    ds2 = xarray.open_dataset(meanFile)
     
     # grid indices
-    x = ds1.x.values
-    y = ds1.y.values
+    x = ds1.lon.values
+    y = ds1.lat.values
 
     # lats and lons
-    lats = ds1.nav_lat.transpose().values[0]
-    lons = ds1.nav_lon.values[0]
-
+    lats = ds1.lat.transpose().values
+    lons = ds1.lon.values
+    
     # central points
     clat = (lats[-1] - lats[0]) / 2
     clon = (lons[-1] - lons[0]) / 2
@@ -68,7 +123,7 @@ if __name__ == "__main__":
     xxx, yyy = meshgrid(lons, lats)
 
     # iterate over the timestamps
-    for t in ds1.time_counter.values:
+    for t in ds1.time.values:
 
         d1 = str(t).split("T")[0]        
         hour = str(t).split("T")[1].split(":")[0]
@@ -78,46 +133,70 @@ if __name__ == "__main__":
         d4 = "%s_%s%s" % (d1, hour, minu)
                 
         # iterate over depth
-        for d in ds1.deptht.values:
+        for d in ds1.depth.values:
             
             # initialise the map
-            bmap = Basemap(resolution='f',
+            bmap = Basemap(resolution=resolution,
                            llcrnrlon=lons[0],llcrnrlat=lats[0],
                            urcrnrlon=lons[-1],urcrnrlat=lats[-1])
             
-            # contourf STD
-            std_data =  ds1.vosaline[0,0,:,:].values
-            std_colormesh = bmap.contourf(xxx, yyy, std_data, cmap='Purples', levels=10, vmin=std_data.min(), vmax=std_data.max())
-
+            ############################################
+            #
+            # Mean
+            #
+            ############################################
+            
             # contour MEAN
-            # contour
-            mean_data =  ds2.vosaline[0,0,:,:].values
-            mean_colormesh = bmap.contour(xxx, yyy, mean_data, cmap='jet', levels=50, linewidths=0.3, vmin=mean_data.min(), vmax=mean_data.max())
+            mean_data_0 =  ds2.vosaline[0,0,:,:]
+            mean_data_1 = mean_data_0.where(mean_data_0 >= meanMinValue).where(mean_data_0 <= meanMaxValue)
+            mean_data = mean_data_1.values            
+            mean_colormesh = bmap.contour(xxx, yyy, mean_data, cmap=meanColorMap, levels=meanLevels, linewidths=0.3)
             
-            # title
-            plt.title("Ensemble mean and spread for salinity at %s m.\nTimestep: %s" % (np.round(d, decimals=2), d3), fontsize = 8)
-            
-            # colorbar STD
-            std_cb = bmap.colorbar(std_colormesh, location='bottom')
-            std_cb.set_label("Spread", fontsize=6)
-            for t in std_cb.ax.get_xticklabels():
-                t.set_fontsize(6)
-
             # colorbar MEAN
-            mean_cb = bmap.colorbar(mean_colormesh, location='right')
-            mean_cb.set_label("Mean salinity (psu)", fontsize=6)
+            meanTicks = range(int(meanMinValue), int(meanMaxValue))
+            mean_cb = bmap.colorbar(mean_colormesh, ticks=meanTicks, location="right")
+            mean_cb.set_label("Mean salinity (psu)", fontsize=5)
             for t in mean_cb.ax.get_yticklabels():
-                t.set_fontsize(6)
+                t.set_fontsize(5)
+
+            ############################################
+            #
+            # Std
+            #
+            ############################################
+
+            # contourf STD
+            std_data_0 =  ds1.vosaline[0,0,:,:]
+            std_data_1 = std_data_0.where(std_data_0 >= stdMinValue).where(std_data_0 <= stdMaxValue)
+            std_data = std_data_1.values
+            std_colormesh = bmap.contourf(xxx, yyy, std_data, cmap=stdColorMap, levels=stdLevels, vmin=stdMinValue, vmax=stdMaxValue)
+
+            # colorbar STD
+            std_cb = bmap.colorbar(std_colormesh, location='bottom', aspect=3)
+            std_cb.set_label("Spread", fontsize=5)
+            for t in std_cb.ax.get_xticklabels():
+                t.set_fontsize(5)
+        
+            ############################################
+            #
+            # General configuration
+            #
+            ############################################            
                 
+            # title
+            finalDate = "%s:30" % (d3.split(":")[0])
+            plt.title("Ensemble mean and spread for salinity at %s m.\nTimestep: %s" % (int(d), finalDate), fontsize = 5)
+                            
             # draw coastlines, country boundaries, fill continents.
             bmap.drawcoastlines(linewidth=0.25)
             bmap.fillcontinents(color='white')
                 
-            # show
-            #plt.show()
-
             # save file
-            di = ds1.deptht.values.tolist().index(d)
+            di = ds1.depth.values.tolist().index(d)
             filename = "output/ens_mean_spread_Salinity_%s_depth%s.png" % (d4, di)
             plt.savefig(filename, dpi=300, bbox_inches="tight")
             print("File %s generated" % filename)
+
+            break
+
+        break
