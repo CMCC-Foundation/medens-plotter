@@ -155,7 +155,7 @@ if __name__ == "__main__":
         # colorbar MEAN
         meanTicks = range(int(meanMinValue), int(meanMaxValue)+1)
         mean_cb = bmap.colorbar(mean_colormesh, ticks=meanTicks, location="right")
-        mean_cb.set_label("Mean ssh (psu)", fontsize=5)
+        mean_cb.set_label("Mean ssh (m)", fontsize=5)
         for t in mean_cb.ax.get_yticklabels():
             t.set_fontsize(5)
 
