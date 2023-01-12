@@ -73,13 +73,21 @@ if __name__ == "__main__":
 
     # paths
     baseEnsPathTemplate = configParser.get("default", "baseEnsPath")
+    baseOutputPath = configParser.get("default", "baseOutputPath")    
     inputFileTemplate = configParser.get("postcardTemp", "inputFile")
     inputFiles = []
+    outputFolder = configParser.get("postcardTemp", "outputFolder")
+    outputFileTemplate = configParser.get("postcardTemp", "outputName")
     print("[%s] -- Input files set to:" % (appname))
     for i in range(10):
         inputFile = os.path.join(baseEnsPathTemplate.format(INSTANCE=i, DATE=inputDate), inputFileTemplate.format(DATE=inputDate))
         inputFiles.append(inputFile)
         print(inputFile)
+    print("[%s] -- Output folder set to: %s" % (appname, os.path.join(baseOutputPath, outputFolder)))
+
+    # create output folder if needed
+    if not os.path.exists(os.path.join(baseOutputPath, outputFolder)):
+        os.makedirs(os.path.join(baseOutputPath, outputFolder))
 
     # chart details
     resolution = configParser.get("postcardTemp", "resolution")
@@ -157,7 +165,7 @@ if __name__ == "__main__":
 
                 # contourf
                 mean_data_0 = datasets[ax_index].votemper[timestep_index,depth_index,:,:]            
-                mean_data = mean_data_0.where(mean_data_0 >= minValue, other=minValue).where(mean_data_0 <= maxValue, other=maxValue)
+                mean_data = mean_data_0.where(mean_data_0 >= minValue).where(mean_data_0 <= maxValue)
                 contour_levels = linspace(minValue, maxValue, levels)
                 im = ax.contourf(xxx, yyy, mean_data, cmap=colorMap, levels=contour_levels, vmin=minValue, vmax=maxValue)
                 ax.set_title("Member %s" % ax_index, fontsize = 5, pad = 4)
@@ -182,7 +190,7 @@ if __name__ == "__main__":
                 
             # save file
             di = datasets[0].deptht.values.tolist().index(d)
-            filename = "output/postcard_Temperature_%s_depth%s.png" % (d4, di)
+            filename = os.path.join(baseOutputPath, outputFolder, outputFileTemplate.format(DATE=d4, DEPTH=di))                    
             plt.savefig(filename, dpi=300, bbox_inches="tight")
             print("File %s generated" % filename)
             plt.clf()
@@ -190,9 +198,5 @@ if __name__ == "__main__":
             # increment depth
             depth_index += 1
 
-            break
-
-        break
-            
         # increment timestep
         timestep_index += 1

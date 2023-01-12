@@ -73,9 +73,18 @@ if __name__ == "__main__":
 
     # paths
     baseEnsPathTemplate = configParser.get("default", "baseEnsPath")
+    baseOutputPath = configParser.get("default", "baseOutputPath")    
     inputFileTemplate = configParser.get("postcardSsh", "inputFile")
+    outputFolder = configParser.get("postcardSsh", "outputFolder")
+    outputFileTemplate = configParser.get("postcardSsh", "outputName")
     inputFiles = []
     print("[%s] -- Input files set to:" % (appname))
+    print("[%s] -- Output folder set to: %s" % (appname, os.path.join(baseOutputPath, outputFolder)))
+
+    # create output folder if needed
+    if not os.path.exists(os.path.join(baseOutputPath, outputFolder)):
+        os.makedirs(os.path.join(baseOutputPath, outputFolder))
+        
     for i in range(10):
         inputFile = os.path.join(baseEnsPathTemplate.format(INSTANCE=i, DATE=inputDate), inputFileTemplate.format(DATE=inputDate))
         inputFiles.append(inputFile)
@@ -142,7 +151,7 @@ if __name__ == "__main__":
 
             # contourf
             mean_data_0 = datasets[ax_index].sossheig[timestep_index,:,:]            
-            mean_data = mean_data_0.where(mean_data_0 >= minValue, other=minValue).where(mean_data_0 <= maxValue, other=maxValue)
+            mean_data = mean_data_0.where(mean_data_0 >= minValue).where(mean_data_0 <= maxValue)
             contour_levels = linspace(minValue, maxValue, levels)
             im = ax.contourf(xxx, yyy, mean_data, cmap=colorMap, levels=contour_levels, vmin=minValue, vmax=maxValue)
             ax.set_title("Member %s" % ax_index, fontsize = 5, pad = 4)
@@ -166,7 +175,7 @@ if __name__ == "__main__":
         plt.suptitle("Sea Surface Height.\nTimestep: %s" % (finalDate), fontsize = 5)
             
         # save file
-        filename = "output/postcard_ssh_%s.png" % (d4)
+        filename = os.path.join(baseOutputPath, outputFolder, outputFileTemplate.format(DATE=d4))        
         plt.savefig(filename, dpi=300, bbox_inches="tight")
         print("File %s generated" % filename)
         plt.clf()
