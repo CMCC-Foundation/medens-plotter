@@ -84,8 +84,8 @@ if __name__ == "__main__":
     # chart details
     resolution = configParser.get("postcardSsh", "resolution")
     colorMap = configParser.get("postcardSsh", "colorMap")
-    minValue = configParser.get("postcardSsh", "minValue")
-    maxValue = configParser.get("postcardSsh", "maxValue")
+    minValue = configParser.getfloat("postcardSsh", "minValue")
+    maxValue = configParser.getfloat("postcardSsh", "maxValue")
     levels = configParser.getint("postcardSsh", "levels")
     print("[%s] -- Resolution set to: %s" % (appname, resolution))
     print("[%s] -- Min Value set to: %s" % (appname, minValue))
@@ -133,37 +133,40 @@ if __name__ == "__main__":
         # iterate over depth
         depth_index = 0
         for d in datasets[0].deptht:
-        
-            # create a figure
-            fig = plt.figure()
-
-            # title
-            finalDate = "%s:30" % (d3.split(":")[0])
-            plt.title("Salinity at %s m.\nTimestep: %s" % (int(d), finalDate), fontsize = 5, pad = 40)
-            plt.axis('off')
             
-            # create 10 subfigures
-            subfigures = []
-            for sub_ind in range(10):
-    
-                # create subplot
-                ax = fig.add_subplot(5, 2, sub_ind+1)
-                ax.set_title("Member %s" % sub_ind, fontsize = 4, pad = 4)
-                
+            fig, axes = plt.subplots(nrows=5, ncols=2)
+                        
+            ax_index = 0
+            for ax in axes.flat:
+
                 # create basemap
                 bmap = Basemap(resolution=resolution,
                                llcrnrlon=lons[0],llcrnrlat=lats[0],
-                               urcrnrlon=lons[-1],urcrnrlat=lats[-1])
-    
+                               urcrnrlon=lons[-1],urcrnrlat=lats[-1], ax=ax)                
+
                 # contourf
-                mean_data = datasets[sub_ind].vosaline[timestep_index,depth_index,:,:]
-                mean_colormesh = bmap.contourf(xxx, yyy, mean_data, cmap=colorMap, levels=levels)
-                
+                mean_data_0 = datasets[ax_index].vosaline[timestep_index,depth_index,:,:]            
+                mean_data = mean_data_0.where(mean_data_0 >= minValue).where(mean_data_0 <= maxValue)
+                im = ax.contourf(xxx, yyy, mean_data, cmap=colorMap, levels=levels, vmin=minValue, vmax=maxValue)
+                ax.set_title("Member %s" % ax_index, fontsize = 5, pad = 4)
+                ax.axis('off')
+                ax_index += 1
+
                 # draw coastlines, country boundaries, fill continents.
                 bmap.drawcoastlines(linewidth=0.25)
                 bmap.fillcontinents(color='white')
-                
-                subfigures.append(ax)
+
+            # colorbar
+            ticks = numpy.arange(minValue, maxValue+1, 1)
+            cb = fig.colorbar(im, ax=axes.ravel().tolist(), ticks=ticks, shrink=0.5)
+            cb.set_label("Salinity (pso)", fontsize = 3)
+            cb.ax.tick_params(labelsize=3)
+            for t in cb.ax.get_xticklabels():
+                t.set_fontsize(1)
+            
+            # title
+            finalDate = "%s:30" % (d3.split(":")[0])
+            plt.suptitle("Salinity at %s m.\nTimestep: %s" % (int(d), finalDate), fontsize = 5)
                 
             # save file
             di = datasets[0].deptht.values.tolist().index(d)
@@ -175,9 +178,5 @@ if __name__ == "__main__":
             # increment depth
             depth_index += 1
             
-            break
-
         # increment timestep
         timestep_index += 1
-            
-        break
