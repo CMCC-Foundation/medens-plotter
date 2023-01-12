@@ -152,7 +152,7 @@ if __name__ == "__main__":
             # contour MEAN
             meanLevelsContour = linspace(meanMinValue, meanMaxValue, num=meanLevels)            
             mean_data_0 =  ds2.vosaline[timestep_index,depth_index,:,:]
-            mean_data_1 = mean_data_0.where(mean_data_0 >= meanMinValue).where(mean_data_0 <= meanMaxValue)
+            mean_data_1 = mean_data_0.where(mean_data_0 >= meanMinValue, other=meanMinValue).where(mean_data_0 <= meanMaxValue, other=meanMaxValue)
             mean_data = mean_data_1.values            
             mean_colormesh = bmap.contour(xxx, yyy, mean_data, cmap=meanColorMap, levels=meanLevelsContour, linewidths=0.3, vmin=meanMinValue, vmax=meanMaxValue)
             
@@ -172,7 +172,7 @@ if __name__ == "__main__":
             # contourf STD
             stdLevelsContourf = linspace(stdMinValue, stdMaxValue, num=stdLevels)
             std_data_0 =  ds1.vosaline[timestep_index,depth_index,:,:]
-            std_data_1 = std_data_0.where(std_data_0 >= stdMinValue).where(std_data_0 <= stdMaxValue)
+            std_data_1 = std_data_0.where(std_data_0 >= stdMinValue, other=stdMinValue).where(std_data_0 <= stdMaxValue, other=stdMaxValue)
             std_data = std_data_1.values
             std_colormesh = bmap.contourf(xxx, yyy, std_data, cmap=stdColorMap, levels=stdLevelsContourf, vmin=stdMinValue, vmax=stdMaxValue)
 

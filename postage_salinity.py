@@ -146,7 +146,7 @@ if __name__ == "__main__":
 
                 # contourf
                 mean_data_0 = datasets[ax_index].vosaline[timestep_index,depth_index,:,:]            
-                mean_data = mean_data_0.where(mean_data_0 >= minValue).where(mean_data_0 <= maxValue)
+                mean_data = mean_data_0.where(mean_data_0 >= minValue, other=minValue).where(mean_data_0 <= maxValue, other=maxValue)
                 contour_levels = linspace(minValue, maxValue, levels)
                 im = ax.contourf(xxx, yyy, mean_data, cmap=colorMap, levels=contour_levels, vmin=minValue, vmax=maxValue)
                 ax.set_title("Member %s" % ax_index, fontsize = 5, pad = 4)
