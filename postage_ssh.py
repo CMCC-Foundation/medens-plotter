@@ -29,7 +29,7 @@ import os
 #
 ###############################################
 
-appname = "PlotPostageSalinity"
+appname = "PlotPostageSsh"
 
 
 ###############################################
@@ -73,7 +73,7 @@ if __name__ == "__main__":
 
     # paths
     baseEnsPathTemplate = configParser.get("default", "baseEnsPath")
-    inputFileTemplate = configParser.get("postcardSalinity", "inputFile")
+    inputFileTemplate = configParser.get("postcardSsh", "inputFile")
     inputFiles = []
     print("[%s] -- Input files set to:" % (appname))
     for i in range(10):
@@ -82,11 +82,11 @@ if __name__ == "__main__":
         print(inputFile)
 
     # chart details
-    resolution = configParser.get("postcardSalinity", "resolution")
-    colorMap = configParser.get("postcardSalinity", "colorMap")
-    minValue = configParser.getfloat("postcardSalinity", "minValue")
-    maxValue = configParser.getfloat("postcardSalinity", "maxValue")
-    levels = configParser.getint("postcardSalinity", "levels")
+    resolution = configParser.get("postcardSsh", "resolution")
+    colorMap = configParser.get("postcardSsh", "colorMap")
+    minValue = configParser.getfloat("postcardSsh", "minValue")
+    maxValue = configParser.getfloat("postcardSsh", "maxValue")
+    levels = configParser.getint("postcardSsh", "levels")
     print("[%s] -- Resolution set to: %s" % (appname, resolution))
     print("[%s] -- Min Value set to: %s" % (appname, minValue))
     print("[%s] -- Max Value set to: %s" % (appname, maxValue))
@@ -129,55 +129,47 @@ if __name__ == "__main__":
 
         # debug print
         print("[%s] -- Timestep: %s" % (appname, d3))
-
-        # iterate over depth
-        depth_index = 0
-        for d in datasets[0].deptht:
-            
-            fig, axes = plt.subplots(nrows=5, ncols=2)
-                        
-            ax_index = 0
-            for ax in axes.flat:
-
-                # create basemap
-                bmap = Basemap(resolution=resolution,
-                               llcrnrlon=lons[0],llcrnrlat=lats[0],
-                               urcrnrlon=lons[-1],urcrnrlat=lats[-1], ax=ax)                
-
-                # contourf
-                mean_data_0 = datasets[ax_index].vosaline[timestep_index,depth_index,:,:]            
-                mean_data = mean_data_0.where(mean_data_0 >= minValue).where(mean_data_0 <= maxValue)
-                contour_levels = linspace(minValue, maxValue, levels)
-                im = ax.contourf(xxx, yyy, mean_data, cmap=colorMap, levels=contour_levels, vmin=minValue, vmax=maxValue)
-                ax.set_title("Member %s" % ax_index, fontsize = 5, pad = 4)
-                ax.axis('off')
-                ax_index += 1
-
-                # draw coastlines, country boundaries, fill continents.
-                bmap.drawcoastlines(linewidth=0.25)
-                bmap.fillcontinents(color='white')
-
-            # colorbar
-            ticks = numpy.arange(minValue, maxValue+1)
-            cb = fig.colorbar(im, ax=axes.ravel().tolist(), ticks=ticks, shrink=0.5)
-            cb.set_label("Salinity (pso)", fontsize = 3)
-            cb.ax.tick_params(labelsize=3)
-            for t in cb.ax.get_xticklabels():
-                t.set_fontsize(1)
-            
-            # title
-            finalDate = "%s:30" % (d3.split(":")[0])
-            plt.suptitle("Salinity at %s m.\nTimestep: %s" % (int(d), finalDate), fontsize = 5)
                 
-            # save file
-            di = datasets[0].deptht.values.tolist().index(d)
-            filename = "output/postcard_Salinity_%s_depth%s.png" % (d4, di)
-            plt.savefig(filename, dpi=300, bbox_inches="tight")
-            print("File %s generated" % filename)
-            plt.clf()
+        fig, axes = plt.subplots(nrows=5, ncols=2)
+        
+        ax_index = 0
+        for ax in axes.flat:
+
+            # create basemap
+            bmap = Basemap(resolution=resolution,
+                           llcrnrlon=lons[0],llcrnrlat=lats[0],
+                           urcrnrlon=lons[-1],urcrnrlat=lats[-1], ax=ax)                
+
+            # contourf
+            mean_data_0 = datasets[ax_index].sossheig[timestep_index,:,:]            
+            mean_data = mean_data_0.where(mean_data_0 >= minValue, other=minValue).where(mean_data_0 <= maxValue, other=maxValue)
+            contour_levels = linspace(minValue, maxValue, levels)
+            im = ax.contourf(xxx, yyy, mean_data, cmap=colorMap, levels=contour_levels, vmin=minValue, vmax=maxValue)
+            ax.set_title("Member %s" % ax_index, fontsize = 5, pad = 4)
+            ax.axis('off')
+            ax_index += 1
+
+            # draw coastlines, country boundaries, fill continents.
+            bmap.drawcoastlines(linewidth=0.25)
+            bmap.fillcontinents(color='white')
+
+        # colorbar
+        ticks = range(int(minValue), int(maxValue)+1, 1)
+        cb = fig.colorbar(im, ax=axes.ravel().tolist(), ticks=ticks, shrink=0.5)
+        cb.set_label("Sea Level Height (m)", fontsize = 3)
+        cb.ax.tick_params(labelsize=3)
+        for t in cb.ax.get_xticklabels():
+            t.set_fontsize(1)
+        
+        # title
+        finalDate = "%s:30" % (d3.split(":")[0])
+        plt.suptitle("Sea Surface Height.\nTimestep: %s" % (finalDate), fontsize = 5)
             
-            # increment depth
-            depth_index += 1
-            
-        # increment timestep
-        timestep_index += 1
+        # save file
+        filename = "output/postcard_ssh_%s.png" % (d4)
+        plt.savefig(filename, dpi=300, bbox_inches="tight")
+        print("File %s generated" % filename)
+        plt.clf()
+        
+    # increment timestep
+    timestep_index += 1
