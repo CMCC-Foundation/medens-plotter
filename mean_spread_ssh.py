@@ -72,10 +72,18 @@ if __name__ == "__main__":
 
     # paths
     basePath = configParser.get("default", "basePath")
+    baseOutputPath = configParser.get("default", "baseOutputPath")
     meanFile = os.path.join(basePath, inputDate, configParser.get("ssh", "meanFile"))
     stdFile = os.path.join(basePath, inputDate, configParser.get("ssh", "stdFile"))
+    outputFolder = configParser.get("ssh", "outputFolder")
+    outputFileTemplate = configParser.get("ssh", "outputName")    
     print("[%s] -- Mean file set to: %s" % (appname, meanFile))
     print("[%s] -- Std file set to: %s" % (appname, stdFile))
+    print("[%s] -- Output folder set to: %s" % (appname, os.path.join(baseOutputPath, outputFolder)))
+
+    # create output folder if needed
+    if not os.path.exists(os.path.join(baseOutputPath, outputFolder)):
+        os.makedirs(os.path.join(baseOutputPath, outputFolder))
     
     # chart details
     meanColorMap = configParser.get("ssh", "meanColorMap")
@@ -194,7 +202,7 @@ if __name__ == "__main__":
         bmap.fillcontinents(color='white')
             
         # save file
-        filename = "output/ens_mean_spread_ssh_%s.png" % (d4)
+        filename = os.path.join(baseOutputPath, outputFolder, outputFileTemplate.format(DATE=d4))
         plt.savefig(filename, dpi=300, bbox_inches="tight")
         print("File %s generated" % filename)
         plt.clf()

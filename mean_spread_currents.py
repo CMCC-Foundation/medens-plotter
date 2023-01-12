@@ -72,14 +72,21 @@ if __name__ == "__main__":
 
     # paths
     basePath = configParser.get("default", "basePath")
+    baseOutputPath = configParser.get("default", "baseOutputPath")
     meanUFile = os.path.join(basePath, inputDate, configParser.get("currents", "meanUFile"))
     meanVFile = os.path.join(basePath, inputDate, configParser.get("currents", "meanVFile"))
     stdUFile = os.path.join(basePath, inputDate, configParser.get("currents", "stdUFile"))
     stdVFile = os.path.join(basePath, inputDate, configParser.get("currents", "stdVFile"))
+    outputFolder = configParser.get("currents", "outputFolder")
+    outputFileTemplate = configParser.get("currents", "outputName")
     print("[%s] -- Mean U file set to: %s" % (appname, meanUFile))
     print("[%s] -- Mean V file set to: %s" % (appname, meanVFile))
     print("[%s] -- Std U file set to: %s" % (appname, stdUFile))
     print("[%s] -- Std V file set to: %s" % (appname, stdVFile))
+    
+    # create output folder if needed
+    if not os.path.exists(os.path.join(baseOutputPath, outputFolder)):
+        os.makedirs(os.path.join(baseOutputPath, outputFolder))
     
     # chart details
     meanColorMap = configParser.get("currents", "meanColorMap")
@@ -229,7 +236,7 @@ if __name__ == "__main__":
             bmap.fillcontinents(color='white')
                 
             # save file
-            filename = "output/ens_mean_spread_currents_%s_depth%s.png" % (d4, depth_index)
+            filename = os.path.join(baseOutputPath, outputFolder, outputFileTemplate.format(DATE=d4, DEPTH=depth_index))
             plt.savefig(filename, dpi=300, bbox_inches="tight")
             print("File %s generated" % filename)
             plt.clf()

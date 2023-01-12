@@ -72,10 +72,18 @@ if __name__ == "__main__":
 
     # paths
     basePath = configParser.get("default", "basePath")
+    baseOutputPath = configParser.get("default", "baseOutputPath")
     meanFile = os.path.join(basePath, inputDate, configParser.get("salinity", "meanFile"))
     stdFile = os.path.join(basePath, inputDate, configParser.get("salinity", "stdFile"))
+    outputFolder = configParser.get("salinity", "outputFolder")
+    outputFileTemplate = configParser.get("salinity", "outputName")
     print("[%s] -- Mean file set to: %s" % (appname, meanFile))
     print("[%s] -- Std file set to: %s" % (appname, stdFile))
+    print("[%s] -- Output folder set to: %s" % (appname, os.path.join(baseOutputPath, outputFolder)))
+
+    # create output folder if needed
+    if not os.path.exists(os.path.join(baseOutputPath, outputFolder)):
+        os.makedirs(os.path.join(baseOutputPath, outputFolder))
     
     # chart details
     meanColorMap = configParser.get("salinity", "meanColorMap")
@@ -199,7 +207,8 @@ if __name__ == "__main__":
                 
             # save file
             di = ds1.depth.values.tolist().index(d)
-            filename = "output/ens_mean_spread_Salinity_%s_depth%s.png" % (d4, di)
+            filename = os.path.join(baseOutputPath, outputFolder, outputFileTemplate.format(DATE=d4, DEPTH=di))
+
             plt.savefig(filename, dpi=300, bbox_inches="tight")
             print("File %s generated" % filename)
             plt.clf()
