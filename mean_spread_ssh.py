@@ -221,8 +221,6 @@ if __name__ == "__main__":
         plt.savefig(filename, dpi=300, bbox_inches="tight")
         print("File %s generated" % filename)
         plt.clf()
-
-        break 
             
         # increment timestep index
         timestep_index += 1
