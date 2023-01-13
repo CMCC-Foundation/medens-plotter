@@ -6,6 +6,7 @@
 #
 ###############################################
 
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
 from numpy import meshgrid
@@ -84,6 +85,11 @@ if __name__ == "__main__":
     # create output folder if needed
     if not os.path.exists(os.path.join(baseOutputPath, outputFolder)):
         os.makedirs(os.path.join(baseOutputPath, outputFolder))
+
+    # black sea mask
+    blackSeaMaskLat = configParser.getfloat("default", "blackSeaMaskLat")
+    blackSeaMaskLon = configParser.getfloat("default", "blackSeaMaskLon")
+    print("[%s] -- Black sea boundaries set to: %s, %s" % (appname, blackSeaMaskLat, blackSeaMaskLon))
     
     # chart details
     meanColorMap = configParser.get("ssh", "meanColorMap")
@@ -146,6 +152,8 @@ if __name__ == "__main__":
         bmap = Basemap(resolution=resolution,
                        llcrnrlon=lons[0],llcrnrlat=lats[0],
                        urcrnrlon=lons[-1],urcrnrlat=lats[-1])
+
+        fig, ax = plt.subplots()
         
         ############################################
         #
@@ -156,16 +164,8 @@ if __name__ == "__main__":
         # contour MEAN
         meanLevelsContour = linspace(meanMinValue, meanMaxValue, num=meanLevels)            
         mean_data_0 =  ds2.sossheig[timestep_index,:,:]
-        mean_data_1 = mean_data_0.where(mean_data_0 >= meanMinValue, other=meanMinValue).where(mean_data_0 <= meanMaxValue, other=meanMaxValue)
-        mean_data = mean_data_1.values            
-        mean_colormesh = bmap.contour(xxx, yyy, mean_data, cmap=meanColorMap, levels=meanLevelsContour, linewidths=0.3, vmin=meanMinValue, vmax=meanMaxValue)
-
-        # colorbar MEAN
-        meanTicks = range(int(meanMinValue), int(meanMaxValue)+1)
-        mean_cb = bmap.colorbar(mean_colormesh, ticks=meanTicks, location="right")
-        mean_cb.set_label("Mean ssh (m)", fontsize=5)
-        for t in mean_cb.ax.get_yticklabels():
-            t.set_fontsize(5)
+        mean_data = mean_data_0.values            
+        mean_colormesh = ax.contour(xxx, yyy, mean_data, cmap=meanColorMap, levels=meanLevelsContour, linewidths=0.2, vmin=meanMinValue, vmax=meanMaxValue, extend='both')
 
         ############################################
         #
@@ -174,18 +174,31 @@ if __name__ == "__main__":
         ############################################
 
         # contourf STD
-        stdLevelsContourf = linspace(stdMinValue, stdMaxValue, num=stdLevels)
+        stdLevelsContourf = linspace(stdMinValue, stdMaxValue) # , num=10) # stdLevels)
         std_data_0 =  ds1.sossheig[timestep_index,:,:]
-        std_data_1 = std_data_0.where(std_data_0 >= stdMinValue, other=stdMinValue).where(std_data_0 <= stdMaxValue, other=stdMaxValue)
+        std_data_1 = std_data_0.where((std_data_0.lat <= blackSeaMaskLat) | (std_data_0.lon <= blackSeaMaskLon))     
         std_data = std_data_1.values
-        std_colormesh = bmap.contourf(xxx, yyy, std_data, cmap=stdColorMap, levels=stdLevelsContourf, vmin=stdMinValue, vmax=stdMaxValue)
+        std_colormesh = ax.contourf(xxx, yyy, std_data, cmap=stdColorMap, extend='both', levels=stdLevels) # , vmin=stdMinValue, vmax=stdMaxValue)
 
+        ############################################
+        #
+        # Colorbars
+        #
+        ############################################
+        
+        # colorbar MEAN
+        meanTicks = range(int(meanMinValue), int(meanMaxValue)+1)
+        mean_cb = bmap.colorbar(mean_colormesh, ticks=meanTicks, location="right", shrink=0.2)
+        mean_cb.set_label("Mean ssh (m)", fontsize=5)
+        for t in mean_cb.ax.get_yticklabels():
+            t.set_fontsize(3)
+        
         # colorbar STD
-        stdTicks = numpy.arange(stdMinValue, stdMaxValue+0.1, 0.1)
-        std_cb = bmap.colorbar(std_colormesh, location='bottom', ticks = stdTicks)
+        stdTicks = numpy.round(linspace(stdMinValue, stdMaxValue+0.1, stdLevels), 2)
+        std_cb = fig.colorbar(std_colormesh, location='bottom', pad = -0.35, shrink = 0.5, ticks = stdTicks)
         std_cb.set_label("Spread", fontsize=5)
         for t in std_cb.ax.get_xticklabels():
-            t.set_fontsize(5)
+            t.set_fontsize(3)
     
         ############################################
         #
@@ -200,12 +213,18 @@ if __name__ == "__main__":
         # draw coastlines, country boundaries, fill continents.
         bmap.drawcoastlines(linewidth=0.25)
         bmap.fillcontinents(color='white')
+        bmap.drawparallels(range(0, 90, 5), linewidth=0.1, labels=[1,0,0,1], fontsize=2)
+        bmap.drawmeridians(range(-90, 90, 5), linewidth=0.1, labels=[1,0,0,1], fontsize=2)
             
         # save file
         filename = os.path.join(baseOutputPath, outputFolder, outputFileTemplate.format(DATE=d4))
         plt.savefig(filename, dpi=300, bbox_inches="tight")
         print("File %s generated" % filename)
         plt.clf()
+
+        break 
             
         # increment timestep index
         timestep_index += 1
+
+        
