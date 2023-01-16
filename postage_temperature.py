@@ -89,6 +89,11 @@ if __name__ == "__main__":
     if not os.path.exists(os.path.join(baseOutputPath, outputFolder)):
         os.makedirs(os.path.join(baseOutputPath, outputFolder))
 
+    # black sea mask
+    blackSeaMaskLat = configParser.getfloat("default", "blackSeaMaskLat")
+    blackSeaMaskLon = configParser.getfloat("default", "blackSeaMaskLon")
+    print("[%s] -- Black sea boundaries set to: %s, %s" % (appname, blackSeaMaskLat, blackSeaMaskLon))
+
     # chart details
     resolution = configParser.get("postcardTemp", "resolution")
     colorMap = configParser.get("postcardTemp", "colorMap")
@@ -165,9 +170,9 @@ if __name__ == "__main__":
 
                 # contourf
                 mean_data_0 = datasets[ax_index].votemper[timestep_index,depth_index,:,:]            
-                mean_data = mean_data_0.where(mean_data_0 >= minValue).where(mean_data_0 <= maxValue)
+                mean_data = mean_data_0.where(((mean_data_0.nav_lat <= blackSeaMaskLat) | (mean_data_0.nav_lon <= blackSeaMaskLon)))                
                 contour_levels = linspace(minValue, maxValue, levels)
-                im = ax.contourf(xxx, yyy, mean_data, cmap=colorMap, levels=contour_levels, vmin=minValue, vmax=maxValue)
+                im = ax.contourf(xxx, yyy, mean_data, cmap=colorMap, levels=contour_levels, extend='both')
                 ax.set_title("Member %s" % ax_index, fontsize = 5, pad = 4)
                 ax.axis('off')
                 ax_index += 1
@@ -175,7 +180,9 @@ if __name__ == "__main__":
                 # draw coastlines, country boundaries, fill continents.
                 bmap.drawcoastlines(linewidth=0.25)
                 bmap.fillcontinents(color='white')
-
+                bmap.drawparallels(range(0, 90, 5), linewidth=0.1, labels=[1,0,0,1], fontsize=2)
+                bmap.drawmeridians(range(-90, 90, 5), linewidth=0.1, labels=[1,0,0,1], fontsize=2)
+             
             # colorbar
             ticks = range(int(minValue), int(maxValue)+1, 1)
             cb = fig.colorbar(im, ax=axes.ravel().tolist(), ticks=ticks, shrink=0.5)
