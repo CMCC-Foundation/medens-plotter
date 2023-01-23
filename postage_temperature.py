@@ -61,7 +61,14 @@ if __name__ == "__main__":
     except:
         inputDate = datetime.datetime.today().strftime("%Y%m%d")
 
-        
+    # read day index
+    day_index = None
+    try:
+        day_index = int(sys.argv[3])
+    except:
+        day_index = 0
+
+               
     ###############################################
     #
     # parse config file
@@ -133,16 +140,31 @@ if __name__ == "__main__":
     # create the grid
     xxx, yyy = meshgrid(lons, lats)
     
-    # iterate over timesteps
+    # define a timestep index (to keep track of the timesteps) and an index to keep track of the day we are in
     timestep_index = 0
+    day_current_index = 0
+    old_day = str(datasets[0].time_counter[0].values).split("T")[0]
+
+    # iterate over timesteps    
     for t in datasets[0].time_counter:
 
-        d1 = str(t.values).split("T")[0]        
+        # get the date of the current timestep, and optionally update the variable and index keeping track of the day
+        d1 = str(t.values).split("T")[0]
+        if d1 != old_day:
+            old_day = d1
+            day_current_index += 1
+
+        # get days string
         hour = str(t).split("T")[1].split(":")[0]
         minu = 30
         d2 = "%s:%s" % (hour, minu)
         d3 = "%s, %s" % (d1, d2)
         d4 = "%s_%s%s" % (d1, hour, minu)
+
+        # check if it's the desired day, otherwise move on
+        if day_current_index != day_index:
+            timestep_index += 1
+            continue
 
         # debug print
         print("[%s] -- Timestep: %s" % (appname, d3))
@@ -150,7 +172,7 @@ if __name__ == "__main__":
         # iterate over depth
         depth_index = 0
         for d in datasets[0].deptht:
-
+            
             if depth_index < 2:
                 minValue = minValue_surf
                 maxValue = maxValue_surf
@@ -162,17 +184,17 @@ if __name__ == "__main__":
             
             ax_index = 0
             for ax in axes.flat:
-
                 # create basemap
                 bmap = Basemap(resolution=resolution,
                                llcrnrlon=lons[0],llcrnrlat=lats[0],
                                urcrnrlon=lons[-1],urcrnrlat=lats[-1], ax=ax)                
 
                 # contourf
-                mean_data_0 = datasets[ax_index].votemper[timestep_index,depth_index,:,:]            
+                mean_data_0 = datasets[ax_index].votemper[timestep_index,depth_index,:,:]
                 mean_data = mean_data_0.where(((mean_data_0.nav_lat <= blackSeaMaskLat) | (mean_data_0.nav_lon <= blackSeaMaskLon)))                
                 contour_levels = linspace(minValue, maxValue, levels)
                 im = ax.contourf(xxx, yyy, mean_data, cmap=colorMap, levels=contour_levels, extend='both')
+                
                 ax.set_title("Member %s" % ax_index, fontsize = 5, pad = 4)
                 ax.axis('off')
                 ax_index += 1
