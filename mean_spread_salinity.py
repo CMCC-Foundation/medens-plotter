@@ -60,6 +60,13 @@ if __name__ == "__main__":
     except:
         inputDate = datetime.datetime.today().strftime("%Y%m%d")
 
+    # read day index
+    day_index = None
+    try:
+        day_index = int(sys.argv[3])
+    except:
+        day_index = 0
+
         
     ###############################################
     #
@@ -136,17 +143,34 @@ if __name__ == "__main__":
     # create the grid
     xxx, yyy = meshgrid(lons, lats)
 
+    # define a timestep index (to keep track of the timesteps) and an index to keep track of the day we are in
+    timestep_index = 0
+    day_current_index = 0
+    old_day = str(ds1.time[0].values).split("T")[0]
+
     # iterate over the timestamps
     timestep_index = 0
     for t in ds1.time.values:
 
+        # get the date of the current timestep, and optionally update the variable and index keeping track of the day
+        d1 = str(t).split("T")[0]
+        if d1 != old_day:
+            old_day = d1
+            day_current_index += 1
+
+        # get days string
         d1 = str(t).split("T")[0]        
         hour = str(t).split("T")[1].split(":")[0]
         minu = str(t).split("T")[1].split(":")[1]
         d2 = "%s:%s" % (hour, minu)
         d3 = "%s, %s" % (d1, d2)
         d4 = "%s_%s%s" % (d1, hour, minu)
-    
+
+        # check if it's the desired day, otherwise move on
+        if day_current_index != day_index:
+            timestep_index += 1
+            continue
+        
         # iterate over depth
         depth_index = 0
         for d in ds1.depth.values:
@@ -180,8 +204,6 @@ if __name__ == "__main__":
             # contourf STD
             stdLevelsContourf = linspace(stdMinValue, stdMaxValue, num=stdLevels)
             std_data_0 =  ds1.vosaline[timestep_index,depth_index,:,:]
-            std_data_1 = std_data_0.where(std_data_0.lat >= blackSeaMaskLat)  # .where((std_data_0.lat >= blackSeaMaskLat) & (std_data_0.lon >= blackSeaMaskLon))
-
             std_data_1 = std_data_0.where(((std_data_0.lat <= blackSeaMaskLat) | (std_data_0.lon <= blackSeaMaskLon)))
             std_data = std_data_1.values
             std_colormesh = bmap.contourf(xxx, yyy, std_data, cmap=stdColorMap, levels=stdLevelsContourf, extend='both')
