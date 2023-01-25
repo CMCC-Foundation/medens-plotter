@@ -90,11 +90,12 @@ if __name__ == "__main__":
     outputFileTemplate = configParser.get("temperature", "outputName")
     print("[%s] -- Mean file set to: %s" % (appname, meanFile))
     print("[%s] -- Std file set to: %s" % (appname, stdFile))
-    print("[%s] -- Output folder set to: %s" % (appname, os.path.join(baseOutputPath, outputFolder)))
 
     # create output folder if needed
-    if not os.path.exists(os.path.join(baseOutputPath, outputFolder)):
-        os.makedirs(os.path.join(baseOutputPath, outputFolder))
+    dst = os.path.join(baseOutputPath, outputFolder.format(DATE=inputDate))
+    if not os.path.exists(dst):
+        os.makedirs(dst)
+    print("[%s] -- Output folder set to: %s" % (appname, dst))
 
     # black sea mask
     blackSeaMaskLat = configParser.getfloat("default", "blackSeaMaskLat")
@@ -271,7 +272,7 @@ if __name__ == "__main__":
 
             # save file
             di = ds1.depth.values.tolist().index(d)
-            filename = os.path.join(baseOutputPath, outputFolder, outputFileTemplate.format(DATE=d4, DEPTH=di))            
+            filename = os.path.join(dst, outputFileTemplate.format(DATE=d4, DEPTH=di))            
             plt.savefig(filename, dpi=300, bbox_inches="tight")
             print("File %s generated" % filename)
             plt.close()

@@ -94,11 +94,13 @@ if __name__ == "__main__":
     print("[%s] -- Mean V file set to: %s" % (appname, meanVFile))
     print("[%s] -- Std U file set to: %s" % (appname, stdUFile))
     print("[%s] -- Std V file set to: %s" % (appname, stdVFile))
-    
+
     # create output folder if needed
-    if not os.path.exists(os.path.join(baseOutputPath, outputFolder)):
-        os.makedirs(os.path.join(baseOutputPath, outputFolder))
-    
+    dst = os.path.join(baseOutputPath, outputFolder.format(DATE=inputDate))
+    if not os.path.exists(dst):
+        os.makedirs(dst)
+    print("[%s] -- Output folder set to: %s" % (appname, dst))
+
     # chart details
     meanColorMap = configParser.get("currents", "meanColorMap")
     meanMinValue = configParser.getfloat("currents", "meanMinValue")
@@ -291,7 +293,7 @@ if __name__ == "__main__":
             bmap.fillcontinents(color='white')
                 
             # save file
-            filename = os.path.join(baseOutputPath, outputFolder, outputFileTemplate.format(DATE=d4, DEPTH=depth_index))
+            filename = os.path.join(dst, outputFileTemplate.format(DATE=d4, DEPTH=depth_index))
             plt.savefig(filename, dpi=300, bbox_inches="tight")
             print("File %s generated" % filename)
             plt.close()

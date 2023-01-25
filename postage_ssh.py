@@ -89,11 +89,12 @@ if __name__ == "__main__":
     outputFileTemplate = configParser.get("postcardSsh", "outputName")
     inputFiles = []
     print("[%s] -- Input files set to:" % (appname))
-    print("[%s] -- Output folder set to: %s" % (appname, os.path.join(baseOutputPath, outputFolder)))
 
     # create output folder if needed
-    if not os.path.exists(os.path.join(baseOutputPath, outputFolder)):
-        os.makedirs(os.path.join(baseOutputPath, outputFolder))
+    dst = os.path.join(baseOutputPath, outputFolder.format(DATE=inputDate))
+    if not os.path.exists(dst):
+        os.makedirs(dst)
+    print("[%s] -- Output folder set to: %s" % (appname, dst))
 
     for i in range(10):
         inputFile = os.path.join(baseEnsPathTemplate.format(INSTANCE=i, DATE=inputDate), inputFileTemplate.format(DATE=inputDate))
@@ -210,7 +211,7 @@ if __name__ == "__main__":
         plt.suptitle("Sea Surface Height.\nTimestep: %s" % (finalDate), fontsize = 5)
             
         # save file
-        filename = os.path.join(baseOutputPath, outputFolder, outputFileTemplate.format(DATE=d4))        
+        filename = os.path.join(dst, outputFileTemplate.format(DATE=d4))        
         plt.savefig(filename, dpi=300, bbox_inches="tight")
         print("File %s generated" % filename)
         plt.close()
