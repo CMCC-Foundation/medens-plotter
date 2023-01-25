@@ -14,6 +14,7 @@ import configparser
 import numpy as np
 import traceback
 import datetime
+import warnings
 import xarray
 import numpy
 import math
@@ -21,6 +22,8 @@ import pdb
 import sys
 import os
 
+# suppress warnings
+warnings.filterwarnings('ignore')
 
 ###############################################
 #
@@ -149,7 +152,6 @@ if __name__ == "__main__":
     old_day = str(ds1.time[0].values).split("T")[0]
 
     # iterate over the timestamps
-    timestep_index = 0
     for t in ds1.time.values:
 
         # get the date of the current timestep, and optionally update the variable and index keeping track of the day
@@ -250,7 +252,7 @@ if __name__ == "__main__":
 
             plt.savefig(filename, dpi=300, bbox_inches="tight")
             print("File %s generated" % filename)
-            plt.clf()
+            plt.close()
             
             # increment depth_index
             depth_index += 1
