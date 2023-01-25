@@ -14,12 +14,16 @@ import configparser
 import numpy as np
 import traceback
 import datetime
+import warnings
 import xarray
 import numpy
 import math
 import pdb
 import sys
 import os
+
+# suppress warnings
+warnings.filterwarnings('ignore')
 
 
 ###############################################
@@ -59,6 +63,13 @@ if __name__ == "__main__":
         inputDate = sys.argv[2]
     except:
         inputDate = datetime.datetime.today().strftime("%Y%m%d")
+
+    # read day index
+    day_index = None
+    try:
+        day_index = int(sys.argv[3])
+    except:
+        day_index = 0
 
         
     ###############################################
@@ -136,16 +147,32 @@ if __name__ == "__main__":
     # create the grid
     xxx, yyy = meshgrid(lons, lats)
 
-    # iterate over the timestamps
+    # define a timestep index (to keep track of the timesteps) and an index to keep track of the day we are in
     timestep_index = 0
+    day_current_index = 0
+    old_day = str(ds1u.time[0].values).split("T")[0]
+    
+    # iterate over the timestamps
     for t in ds1u.time.values:
 
+        # get the date of the current timestep, and optionally update the variable and index keeping track of the day
+        d1 = str(t).split("T")[0]
+        if d1 != old_day:
+            old_day = d1
+            day_current_index += 1
+
+        # get days string
         d1 = str(t).split("T")[0]        
         hour = str(t).split("T")[1].split(":")[0]
         minu = str(t).split("T")[1].split(":")[1]
         d2 = "%s:%s" % (hour, minu)
         d3 = "%s, %s" % (d1, d2)
         d4 = "%s_%s%s" % (d1, hour, minu)
+
+        # check if it's the desired day, otherwise move on
+        if day_current_index != day_index:
+            timestep_index += 1
+            continue
         
         # iterate over depth
         depth_index = 0
@@ -267,14 +294,10 @@ if __name__ == "__main__":
             filename = os.path.join(baseOutputPath, outputFolder, outputFileTemplate.format(DATE=d4, DEPTH=depth_index))
             plt.savefig(filename, dpi=300, bbox_inches="tight")
             print("File %s generated" % filename)
-            plt.clf()
+            plt.close()
 
             # increment depth index
             depth_index += 1
     
-            break
-
-        break
-        
         # increment timestep index
         timestep_index += 1
