@@ -171,8 +171,9 @@ if __name__ == "__main__":
 
         # debug print
         print("[%s] -- Timestep: %s" % (appname, d3))
-                
-        fig, axes = plt.subplots(nrows=5, ncols=2)
+
+        # create a new figure
+        fig, axes = plt.subplots(nrows=5, ncols=2, clear=True)
         
         ax_index = 0
         for ax in axes.flat:
@@ -214,7 +215,9 @@ if __name__ == "__main__":
         filename = os.path.join(dst, outputFileTemplate.format(DATE=d4))        
         plt.savefig(filename, dpi=300, bbox_inches="tight")
         print("File %s generated" % filename)
-        plt.close()
+
+        fig.clear()
+        plt.close(fig)
         
     # increment timestep
     timestep_index += 1

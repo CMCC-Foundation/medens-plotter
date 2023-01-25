@@ -226,8 +226,10 @@ if __name__ == "__main__":
             filename = os.path.join(dst, outputFileTemplate.format(DATE=d4, DEPTH=di))                    
             plt.savefig(filename, dpi=300, bbox_inches="tight")
             print("File %s generated" % filename)
-            plt.close()
-            
+
+            fig.clear()
+            plt.close(fig)
+        
             # increment depth
             depth_index += 1
 
