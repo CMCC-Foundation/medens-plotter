@@ -15,6 +15,7 @@ import configparser
 import numpy as np
 import traceback
 import datetime
+import warnings
 import xarray
 import numpy
 import math
@@ -22,6 +23,8 @@ import pdb
 import sys
 import os
 
+# suppress warnings
+warnings.filterwarnings('ignore')
 
 ###############################################
 #
@@ -222,7 +225,7 @@ if __name__ == "__main__":
             filename = os.path.join(baseOutputPath, outputFolder, outputFileTemplate.format(DATE=d4, DEPTH=di))                    
             plt.savefig(filename, dpi=300, bbox_inches="tight")
             print("File %s generated" % filename)
-            plt.clf()
+            plt.close()
             
             # increment depth
             depth_index += 1
