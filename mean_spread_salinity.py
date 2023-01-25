@@ -250,11 +250,13 @@ if __name__ == "__main__":
             # save file
             di = ds1.depth.values.tolist().index(d)
             filename = os.path.join(dst, outputFileTemplate.format(DATE=d4, DEPTH=di))
-
             plt.savefig(filename, dpi=300, bbox_inches="tight")
             print("File %s generated" % filename)
-            plt.close()
-            
+
+            # clear memory
+            fig.clear()
+            plt.close(fig)
+
             # increment depth_index
             depth_index += 1
 
