@@ -97,7 +97,7 @@ if __name__ == "__main__":
     # create output folder if needed
     dst = os.path.join(baseOutputPath, outputFolder.format(DATE=inputDate))
     if not os.path.exists(dst):
-        os.makedirs(dst)
+        os.makedirs(dst, exist_ok=True)
     print("[%s] -- Output folder set to: %s" % (appname, dst))
     
     # black sea mask
