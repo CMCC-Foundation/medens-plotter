@@ -201,11 +201,11 @@ if __name__ == "__main__":
         ############################################
 
         # contourf STD
-        stdLevelsContourf = linspace(stdMinValue, stdMaxValue) # , num=10) # stdLevels)
+        stdLevelsContourf = linspace(stdMinValue, stdMaxValue, num=stdLevels)
         std_data_0 =  ds1.sossheig[timestep_index,:,:]
         std_data_1 = std_data_0.where((std_data_0.lat <= blackSeaMaskLat) | (std_data_0.lon <= blackSeaMaskLon))     
         std_data = std_data_1.values
-        std_colormesh = ax.contourf(xxx, yyy, std_data, cmap=stdColorMap, extend='both', levels=stdLevels) # , vmin=stdMinValue, vmax=stdMaxValue)
+        std_colormesh = ax.contourf(xxx, yyy, std_data, cmap=stdColorMap, extend='both', levels=stdLevelsContourf, vmin=stdMinValue, vmax=stdMaxValue)
 
         ############################################
         #
@@ -221,7 +221,12 @@ if __name__ == "__main__":
             t.set_fontsize(3)
         
         # colorbar STD
-        stdTicks = numpy.round(linspace(stdMinValue, stdMaxValue+0.1, stdLevels), 2)
+        print(stdMinValue)
+        print(stdMaxValue)
+        print(linspace(stdMinValue, stdMaxValue+0.1, stdLevels))
+        # stdTicks = numpy.round(linspace(stdMinValue, stdMaxValue+0.1, stdLevels), 2)
+        stdTicks = numpy.arange(stdMinValue, stdMaxValue+0.05, 0.05)
+        print(stdTicks)
         std_cb = fig.colorbar(std_colormesh, location='bottom', pad = -0.35, shrink = 0.5, ticks = stdTicks)
         std_cb.set_label("Spread", fontsize=5)
         for t in std_cb.ax.get_xticklabels():
