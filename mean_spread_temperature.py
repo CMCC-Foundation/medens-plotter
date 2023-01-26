@@ -265,8 +265,8 @@ if __name__ == "__main__":
             plt.title("Ensemble spread for Sea temperature at %s m.\nTimestep: %s" % (int(d), finalDate), fontsize = 5)
             
             # draw coastlines, country boundaries, fill continents.
-            bmap.drawcoastlines(linewidth=0.25)
-            bmap.fillcontinents(color='white')
+            bmap.drawcoastlines(linewidth=0.15)
+            bmap.fillcontinents()
             bmap.drawparallels(range(0, 90, 5), linewidth=0.1, labels=[1,0,0,1], fontsize=2)
             bmap.drawmeridians(range(-90, 90, 5), linewidth=0.1, labels=[1,0,0,1], fontsize=2)
 
