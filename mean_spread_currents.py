@@ -169,7 +169,7 @@ if __name__ == "__main__":
         minu = str(t).split("T")[1].split(":")[1]
         d2 = "%s:%s" % (hour, minu)
         d3 = "%s, %s" % (d1, d2)
-        d4 = "%s_%s%s" % (d1, hour, minu)
+        d4 = "%s_%s30" % (d1, hour)
 
         # check if it's the desired day, otherwise move on
         if day_current_index != day_index:
