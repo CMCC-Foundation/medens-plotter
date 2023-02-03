@@ -64,13 +64,6 @@ if __name__ == "__main__":
     except:
         inputDate = datetime.datetime.today().strftime("%Y%m%d")
 
-    # read day index
-    day_index = None
-    try:
-        day_index = int(sys.argv[3])
-    except:
-        day_index = 0
-
         
     ###############################################
     #
@@ -84,10 +77,8 @@ if __name__ == "__main__":
     # paths
     baseEnsPathTemplate = configParser.get("default", "baseEnsPath")
     baseOutputPath = configParser.get("default", "baseOutputPath")    
-    inputFileTemplateU = configParser.get("postcardCurrents", "inputFileU")
-    inputFileTemplateV = configParser.get("postcardCurrents", "inputFileV")
+    inputFileTemplateU = configParser.get("postcardCurrents", "inputFile")
     inputFilesU = []
-    inputFilesV = []
     outputFolder = configParser.get("postcardCurrents", "outputFolder")
     outputFileTemplate = configParser.get("postcardCurrents", "outputName")
     print("[%s] -- Input files set to:" % (appname))
@@ -95,10 +86,6 @@ if __name__ == "__main__":
         inputFileU = os.path.join(baseEnsPathTemplate.format(INSTANCE=i, DATE=inputDate), inputFileTemplateU.format(DATE=inputDate))        
         inputFilesU.append(inputFileU)
         print(inputFileU)
-
-        inputFileV = os.path.join(baseEnsPathTemplate.format(INSTANCE=i, DATE=inputDate), inputFileTemplateV.format(DATE=inputDate))        
-        inputFilesV.append(inputFileV)
-        print(inputFileV)
         
     # create output folder if needed
     dst = os.path.join(baseOutputPath, outputFolder.format(DATE=inputDate))
@@ -135,11 +122,6 @@ if __name__ == "__main__":
     for i in inputFilesU:
         datasetsU.append(xarray.open_dataset(i))
 
-    datasetsV = []
-    for i in inputFilesV:
-        datasetsV.append(xarray.open_dataset(i))
-
-        
     # grid indices
     x = datasetsU[0].nav_lon.transpose().values[0]
     y = datasetsU[0].nav_lat.values[0]
@@ -168,16 +150,8 @@ if __name__ == "__main__":
 
         # get days string
         d1 = str(t.values).split("T")[0]        
-        hour = str(t).split("T")[1].split(":")[0]
-        minu = 30
-        d2 = "%s:%s" % (hour, minu)
-        d3 = "%s, %s" % (d1, d2)
-        d4 = "%s_%s%s" % (d1, hour, minu)
-
-        # check if it's the desired day, otherwise move on
-        if day_current_index != day_index:
-            timestep_index += 1
-            continue
+        d3 = "%s, 12:30" % (d1)
+        d4 = "%s_1230" % (d1)
 
         # debug print
         print("[%s] -- Timestep: %s" % (appname, d3))
@@ -198,7 +172,7 @@ if __name__ == "__main__":
 
                 # contourf
                 mean_data_0u = datasetsU[ax_index].vozocrtx[timestep_index,depth_index,:,:]
-                mean_data_0v = datasetsV[ax_index].vomecrty[timestep_index,depth_index,:,:]                
+                mean_data_0v = datasetsU[ax_index].vomecrty[timestep_index,depth_index,:,:]                
                 mean_data_u = mean_data_0u.where(((mean_data_0u.nav_lat <= blackSeaMaskLat) | (mean_data_0u.nav_lon <= blackSeaMaskLon)))
                 mean_data_v = mean_data_0v.where(((mean_data_0v.nav_lat <= blackSeaMaskLat) | (mean_data_0v.nav_lon <= blackSeaMaskLon)))
                 mean_data = numpy.sqrt(mean_data_u ** 2 + mean_data_v ** 2)                

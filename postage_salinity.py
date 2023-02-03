@@ -64,13 +64,6 @@ if __name__ == "__main__":
     except:
         inputDate = datetime.datetime.today().strftime("%Y%m%d")
 
-    # read day index
-    day_index = None
-    try:
-        day_index = int(sys.argv[3])
-    except:
-        day_index = 0
-
         
     ###############################################
     #
@@ -157,16 +150,8 @@ if __name__ == "__main__":
 
         # get days string
         d1 = str(t.values).split("T")[0]        
-        hour = str(t).split("T")[1].split(":")[0]
-        minu = 30
-        d2 = "%s:%s" % (hour, minu)
-        d3 = "%s, %s" % (d1, d2)
-        d4 = "%s_%s%s" % (d1, hour, minu)
-
-        # check if it's the desired day, otherwise move on
-        if day_current_index != day_index:
-            timestep_index += 1
-            continue
+        d3 = "%s, 12:30" % (d1)
+        d4 = "%s_1230" % (d1)
 
         # debug print
         print("[%s] -- Timestep: %s" % (appname, d3))
