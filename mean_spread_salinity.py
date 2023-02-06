@@ -279,7 +279,5 @@ if __name__ == "__main__":
             # increment depth_index
             depth_index += 1
 
-            sys.exit()
-            
         # increment timestep index
         timestep_index += 1

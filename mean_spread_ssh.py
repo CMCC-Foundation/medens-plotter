@@ -272,5 +272,3 @@ if __name__ == "__main__":
         
         # increment timestep index
         timestep_index += 1
-
-        sys.exit()
