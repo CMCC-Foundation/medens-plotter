@@ -215,12 +215,21 @@ if __name__ == "__main__":
             #
             ############################################
 
-            # define the white
-            reds = cm.get_cmap('Reds', 256)
-            newcolors = reds(np.linspace(0, 1, 256))
+            max_percentage = 100
+            white_percentage = 10
             white = np.array([256/256, 256/256, 256/256, 1])
-            newcolors[:15, :] = white
-            newcmp = ListedColormap(newcolors)
+            reds = cm.get_cmap(stdColorMap, 256)
+            fv = reds(np.linspace(0, 1, max_percentage))
+            fv[:white_percentage, :] = white
+            fv[white_percentage:, :] = reds(np.linspace(0, 1, max_percentage-white_percentage))
+            newcmp = ListedColormap(fv)
+            
+            # # define the white
+            # reds = cm.get_cmap('Reds', 256)
+            # newcolors = reds(np.linspace(0, 1, 256))
+            # white = np.array([256/256, 256/256, 256/256, 1])
+            # newcolors[:15, :] = white
+            # newcmp = ListedColormap(newcolors)
             
             # contourf STD
             stdLevelsContourf = linspace(stdMinValue, stdMaxValue, num=stdLevels)
