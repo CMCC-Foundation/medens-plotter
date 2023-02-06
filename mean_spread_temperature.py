@@ -6,12 +6,15 @@
 #
 ###############################################
 
+from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
 from numpy import meshgrid
 from numpy import linspace
+from matplotlib import cm
 import configparser
 import numpy as np
+import matplotlib
 import traceback
 import datetime
 import warnings
@@ -102,30 +105,45 @@ if __name__ == "__main__":
     blackSeaMaskLon = configParser.getfloat("default", "blackSeaMaskLon")
     print("[%s] -- Black sea boundaries set to: %s, %s" % (appname, blackSeaMaskLat, blackSeaMaskLon))
     
+    # read min and max values for mean temperature
+    meanMinValues_surf = []
+    meanMaxValues_surf = []
+    stdMinValues_surf = []
+    stdMaxValues_surf = []
+    meanMinValues_bott = []
+    meanMaxValues_bott = []
+    stdMinValues_bott = []
+    stdMaxValues_bott = []        
+    for i in range(0, 12):
+        
+        # read surface values    
+        meanMinValues_surf.append(configParser.getfloat("temperature", "meanMinValue_surf_%s" % str(i+1)))
+        meanMaxValues_surf.append(configParser.getfloat("temperature", "meanMaxValue_surf_%s" % str(i+1)))
+        stdMinValues_surf.append(configParser.getfloat("temperature", "stdMinValue_surf_%s" % str(i+1)))
+        stdMaxValues_surf.append(configParser.getfloat("temperature", "stdMaxValue_surf_%s" % str(i+1)))
+
+        # read bottom values
+        meanMinValues_bott.append(configParser.getfloat("temperature", "meanMinValue_bott_%s" % str(i+1)))
+        meanMaxValues_bott.append(configParser.getfloat("temperature", "meanMaxValue_bott_%s" % str(i+1)))
+        stdMinValues_bott.append(configParser.getfloat("temperature", "stdMinValue_bott_%s" % str(i+1)))
+        stdMaxValues_bott.append(configParser.getfloat("temperature", "stdMaxValue_bott_%s" % str(i+1)))
+
     # chart details
     meanColorMap = configParser.get("temperature", "meanColorMap")
-    meanMinValue_surf = configParser.getfloat("temperature", "meanMinValue_surf")
-    meanMaxValue_surf = configParser.getfloat("temperature", "meanMaxValue_surf")
-    meanMinValue_bott = configParser.getfloat("temperature", "meanMinValue_bott")
-    meanMaxValue_bott = configParser.getfloat("temperature", "meanMaxValue_bott")
     meanLevels = configParser.getint("temperature", "meanLevels")
     stdColorMap = configParser.get("temperature", "stdColorMap")
-    stdMinValue_surf = configParser.getfloat("temperature", "stdMinValue_surf")
-    stdMaxValue_surf = configParser.getfloat("temperature", "stdMaxValue_surf")
-    stdMinValue_bott = configParser.getfloat("temperature", "stdMinValue_bott")
-    stdMaxValue_bott = configParser.getfloat("temperature", "stdMaxValue_bott")    
     stdLevels = configParser.getint("temperature", "stdLevels")    
     resolution = configParser.get("temperature", "resolution")
     print("[%s] -- Mean color map set to: %s" % (appname, meanColorMap))
-    print("[%s] -- Mean min value (surf) set to: %s" % (appname, meanMinValue_surf))
-    print("[%s] -- Mean max value (surf) set to: %s" % (appname, meanMaxValue_surf))
-    print("[%s] -- Mean min value (bott) set to: %s" % (appname, meanMinValue_bott))
-    print("[%s] -- Mean max value (bott) set to: %s" % (appname, meanMaxValue_bott))
+    print("[%s] -- Mean min values (surf) set to: %s" % (appname, meanMinValues_surf))
+    print("[%s] -- Mean max values (surf) set to: %s" % (appname, meanMaxValues_surf))
+    print("[%s] -- Mean min values (bott) set to: %s" % (appname, meanMinValues_bott))
+    print("[%s] -- Mean max values (bott) set to: %s" % (appname, meanMaxValues_bott))
     print("[%s] -- Std color map set to: %s" % (appname, stdColorMap))
-    print("[%s] -- Std min value (surf) set to: %s" % (appname, stdMinValue_surf))
-    print("[%s] -- Std max value (surf) set to: %s" % (appname, stdMaxValue_surf))
-    print("[%s] -- Std min value (bott) set to: %s" % (appname, stdMinValue_bott))
-    print("[%s] -- Std max value (bott) set to: %s" % (appname, stdMaxValue_bott))    
+    print("[%s] -- Std min values (surf) set to: %s" % (appname, stdMinValues_surf))
+    print("[%s] -- Std max values (surf) set to: %s" % (appname, stdMaxValues_surf))
+    print("[%s] -- Std min values (bott) set to: %s" % (appname, stdMinValues_bott))
+    print("[%s] -- Std max values (bott) set to: %s" % (appname, stdMaxValues_bott))    
     print("[%s] -- Resolution set to: %s" % (appname, resolution))
 
     
@@ -171,7 +189,8 @@ if __name__ == "__main__":
             day_current_index += 1
 
         # get days string
-        d1 = str(t).split("T")[0]        
+        d1 = str(t).split("T")[0]
+        month = str(int(d1.split("-")[1]))
         hour = str(t).split("T")[1].split(":")[0]
         minu = str(t).split("T")[1].split(":")[1]
         d2 = "%s:%s" % (hour, minu)
@@ -195,15 +214,15 @@ if __name__ == "__main__":
             fig, ax = plt.subplots()
             
             if depth_index < 2:
-                meanMinValue = meanMinValue_surf
-                meanMaxValue = meanMaxValue_surf
-                stdMinValue = stdMinValue_surf
-                stdMaxValue = stdMaxValue_surf                
+                meanMinValue = meanMinValues_surf[int(month)+1]
+                meanMaxValue = meanMaxValues_surf[int(month)+1]
+                stdMinValue = stdMinValues_surf[int(month)+1]
+                stdMaxValue = stdMaxValues_surf[int(month)+1]       
             else:
-                meanMinValue = meanMinValue_bott
-                meanMaxValue = meanMaxValue_bott
-                stdMinValue = stdMinValue_bott
-                stdMaxValue = stdMaxValue_bott                
+                meanMinValue = meanMinValues_bott[int(month)+1]
+                meanMaxValue = meanMaxValues_bott[int(month)+1]
+                stdMinValue = stdMinValues_bott[int(month)+1]
+                stdMaxValue = stdMaxValues_bott[int(month)+1]       
             
             
             ############################################
@@ -225,14 +244,21 @@ if __name__ == "__main__":
             #
             ############################################                                            
 
+            max_percentage = 100
+            white_percentage = 25
+            white = np.array([256/256, 256/256, 256/256, 1])
+            reds = cm.get_cmap(stdColorMap, 256)
+            fv = reds(np.linspace(0, 1, max_percentage))
+            fv[:white_percentage, :] = white
+            fv[white_percentage:, :] = reds(np.linspace(0, 1, max_percentage-white_percentage))
+            newcmp = ListedColormap(fv)
+            
             # contourf STD
             stdLevelsContourf = linspace(stdMinValue, stdMaxValue, num=stdLevels)
             std_data_0 =  ds1.votemper[timestep_index,depth_index,:,:]
             std_data_1 = std_data_0.where((std_data_0.lat <= blackSeaMaskLat) | (std_data_0.lon <= blackSeaMaskLon))
-
-            # .where(std_data_0 >= stdMinValue, other=stdMinValue).where(std_data_0 <= stdMaxValue, other=stdMaxValue)
             std_data = std_data_1.values
-            std_colormesh = bmap.contourf(xxx, yyy, std_data, cmap=stdColorMap, levels=stdLevelsContourf, vmin=stdMinValue, vmax=stdMaxValue, extend='both')
+            std_colormesh = bmap.contourf(xxx, yyy, std_data, cmap=newcmp, levels=stdLevelsContourf, vmin=stdMinValue, vmax=stdMaxValue, extend='both')
 
             ############################################
             #

@@ -6,12 +6,15 @@
 #
 ###############################################
 
+from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
 from numpy import meshgrid
 from numpy import linspace
+from matplotlib import cm
 import configparser
 import numpy as np
+import matplotlib
 import traceback
 import datetime
 import warnings
@@ -190,13 +193,21 @@ if __name__ == "__main__":
             # Mean
             #
             ############################################
+
+            # customize colormap
+            min_val, max_val = 0.15, 1.0
+            n = 10            
+            orig_cmap = cm.gist_rainbow
+            colors = orig_cmap(np.linspace(min_val, max_val, n))
+            cmap = cm.colors.LinearSegmentedColormap.from_list("mycmap", colors)
             
             # contour MEAN
             meanLevelsContour = linspace(meanMinValue, meanMaxValue, num=meanLevels)            
             mean_data_0 =  ds2.vosaline[timestep_index,depth_index,:,:]
             mean_data_1 = mean_data_0
             mean_data = mean_data_1.values            
-            mean_colormesh = bmap.contour(xxx, yyy, mean_data, cmap=meanColorMap, levels=meanLevelsContour, linewidths=0.15, extend='both')
+            # mean_colormesh = bmap.contour(xxx, yyy, mean_data, cmap=meanColorMap, levels=meanLevelsContour, linewidths=0.15, extend='both')
+            mean_colormesh = bmap.contour(xxx, yyy, mean_data, cmap=cmap, levels=meanLevelsContour, linewidths=0.15, extend='both')
             
             ############################################
             #
@@ -204,12 +215,20 @@ if __name__ == "__main__":
             #
             ############################################
 
+            # define the white
+            reds = cm.get_cmap('Reds', 256)
+            newcolors = reds(np.linspace(0, 1, 256))
+            white = np.array([256/256, 256/256, 256/256, 1])
+            newcolors[:15, :] = white
+            newcmp = ListedColormap(newcolors)
+            
             # contourf STD
             stdLevelsContourf = linspace(stdMinValue, stdMaxValue, num=stdLevels)
             std_data_0 =  ds1.vosaline[timestep_index,depth_index,:,:]
             std_data_1 = std_data_0.where(((std_data_0.lat <= blackSeaMaskLat) | (std_data_0.lon <= blackSeaMaskLon)))
             std_data = std_data_1.values
-            std_colormesh = bmap.contourf(xxx, yyy, std_data, cmap=stdColorMap, levels=stdLevelsContourf, extend='both')
+            # std_colormesh = bmap.contourf(xxx, yyy, std_data, cmap=stdColorMap, levels=stdLevelsContourf, extend='both')
+            std_colormesh = bmap.contourf(xxx, yyy, std_data, cmap=newcmp, levels=stdLevelsContourf, extend='both')
             
             ############################################
             #
@@ -260,5 +279,7 @@ if __name__ == "__main__":
             # increment depth_index
             depth_index += 1
 
+            sys.exit()
+            
         # increment timestep index
         timestep_index += 1
