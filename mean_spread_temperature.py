@@ -231,12 +231,19 @@ if __name__ == "__main__":
             #
             ############################################                                            
 
+            # customize colormap
+            min_val, max_val = 0, 0.7
+            n = 10            
+            orig_cmap = cm.gist_rainbow
+            colors = orig_cmap(np.linspace(min_val, max_val, n))
+            cmap = cm.colors.LinearSegmentedColormap.from_list("mycmap", colors)
+
             # contour MEAN
             meanLevelsContour = linspace(meanMinValue, meanMaxValue, num=meanLevels)            
             mean_data_0 =  ds2.votemper[timestep_index,depth_index,:,:]
             mean_data_1 = mean_data_0.where(mean_data_0 >= meanMinValue, other=meanMinValue).where(mean_data_0 <= meanMaxValue, other=meanMaxValue)
             mean_data = mean_data_1.values                        
-            mean_colormesh = bmap.contour(xxx, yyy, mean_data, cmap=meanColorMap, levels=meanLevelsContour, linewidths=0.15, vmin=meanMinValue, vmax=meanMaxValue, extend='both')
+            mean_colormesh = bmap.contour(xxx, yyy, mean_data, cmap=cmap, levels=meanLevelsContour, linewidths=0.15, vmin=meanMinValue, vmax=meanMaxValue, extend='both')
             
             ############################################
             #
