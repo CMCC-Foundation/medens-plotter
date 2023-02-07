@@ -191,7 +191,7 @@ if __name__ == "__main__":
         ############################################
 
         # customize colormap
-        min_val, max_val = 0.15, 1.0
+        min_val, max_val = 0.2, 1.0
         n = 10            
         orig_cmap = cm.gist_rainbow
         colors = orig_cmap(np.linspace(min_val, max_val, n))
@@ -210,7 +210,7 @@ if __name__ == "__main__":
         ############################################
 
         max_percentage = 100
-        white_percentage = 30
+        white_percentage = 20
         white = np.array([256/256, 256/256, 256/256, 1])
         reds = cm.get_cmap(stdColorMap, 256)
         fv = reds(np.linspace(0, 1, max_percentage))
@@ -223,7 +223,7 @@ if __name__ == "__main__":
         std_data_0 =  ds1.sossheig[timestep_index,:,:]
         std_data_1 = std_data_0.where((std_data_0.lat <= blackSeaMaskLat) | (std_data_0.lon <= blackSeaMaskLon))     
         std_data = std_data_1.values
-        std_colormesh = ax.contourf(xxx, yyy, std_data, cmap=newcmp, extend='both', levels=stdLevelsContourf, vmin=stdMinValue, vmax=stdMaxValue)
+        std_colormesh = ax.contourf(xxx, yyy, std_data, cmap=newcmp, extend='max', levels=stdLevelsContourf, vmin=stdMinValue, vmax=stdMaxValue)
 
         ############################################
         #
