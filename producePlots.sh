@@ -49,8 +49,6 @@ for DAY in $(seq 0 8); do
 	    JOBID=$(bsub -q s_medium -P 0510 -J "plot_mean_spread_${VAR}_${DAY}" -o ${LOG_PATH}/plot_mean_spread_${VAR}_${DATE}_${DAY}__%J.log -e ${LOG_PATH}/plot_mean_spread_${VAR}_${DATE}_${DAY}__%J.err "python $EXE_PATH ${CONFIG_FILE} ${DATE} ${DAY}" &)
 	    echo $JOBID
 	    
-	done	   
-	
     done
     
 done
