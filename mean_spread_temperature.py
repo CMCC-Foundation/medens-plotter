@@ -251,8 +251,9 @@ if __name__ == "__main__":
             #
             ############################################                                            
 
+            # define the colormap
             max_percentage = 100
-            white_percentage = 25
+            white_percentage = 20
             white = np.array([256/256, 256/256, 256/256, 1])
             reds = cm.get_cmap(stdColorMap, 256)
             fv = reds(np.linspace(0, 1, max_percentage))
@@ -261,7 +262,7 @@ if __name__ == "__main__":
             newcmp = ListedColormap(fv)
             
             # contourf STD
-            stdLevelsContourf = linspace(stdMinValue, stdMaxValue, num=stdLevels)
+            stdLevelsContourf = linspace(stdMinValue, stdMaxValue, num=stdLevels+1)
             std_data_0 =  ds1.votemper[timestep_index,depth_index,:,:]
             std_data_1 = std_data_0.where((std_data_0.lat <= blackSeaMaskLat) | (std_data_0.lon <= blackSeaMaskLon))
             std_data = std_data_1.values

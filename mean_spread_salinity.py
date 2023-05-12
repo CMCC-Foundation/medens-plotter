@@ -206,8 +206,7 @@ if __name__ == "__main__":
             mean_data_0 =  ds2.vosaline[timestep_index,depth_index,:,:]
             mean_data_1 = mean_data_0
             mean_data = mean_data_1.values            
-            # mean_colormesh = bmap.contour(xxx, yyy, mean_data, cmap=meanColorMap, levels=meanLevelsContour, linewidths=0.15, extend='both')
-            mean_colormesh = bmap.contour(xxx, yyy, mean_data, cmap=cmap, levels=meanLevelsContour, linewidths=0.15, extend='both')
+            mean_colormesh = bmap.contour(xxx, yyy, mean_data, cmap=cmap, levels=meanLevelsContour, linewidths=0.15, extend='both', vmin=meanMinValue, vmax=meanMaxValue)
             
             ############################################
             #
@@ -215,28 +214,21 @@ if __name__ == "__main__":
             #
             ############################################
 
+            # define the new colormap
             max_percentage = 100
             white_percentage = 10
             white = np.array([256/256, 256/256, 256/256, 1])
             reds = cm.get_cmap(stdColorMap, 256)
             fv = reds(np.linspace(0, 1, max_percentage))
             fv[:white_percentage, :] = white
-            fv[white_percentage:, :] = reds(np.linspace(0, 1, max_percentage-white_percentage))
+            fv[white_percentage:, :] = reds(np.linspace(0, 1, max_percentage-white_percentage))            
             newcmp = ListedColormap(fv)
-            
-            # # define the white
-            # reds = cm.get_cmap('Reds', 256)
-            # newcolors = reds(np.linspace(0, 1, 256))
-            # white = np.array([256/256, 256/256, 256/256, 1])
-            # newcolors[:15, :] = white
-            # newcmp = ListedColormap(newcolors)
-            
+                        
             # contourf STD
-            stdLevelsContourf = linspace(stdMinValue, stdMaxValue, num=stdLevels)
+            stdLevelsContourf = linspace(stdMinValue, stdMaxValue, num=stdLevels+1)
             std_data_0 =  ds1.vosaline[timestep_index,depth_index,:,:]
             std_data_1 = std_data_0.where(((std_data_0.lat <= blackSeaMaskLat) | (std_data_0.lon <= blackSeaMaskLon)))
             std_data = std_data_1.values
-            # std_colormesh = bmap.contourf(xxx, yyy, std_data, cmap=stdColorMap, levels=stdLevelsContourf, extend='both')
             std_colormesh = bmap.contourf(xxx, yyy, std_data, cmap=newcmp, levels=stdLevelsContourf, extend='both')
             
             ############################################
@@ -247,6 +239,7 @@ if __name__ == "__main__":
             
             # colorbar MEAN
             meanTicks = range(int(meanMinValue), int(meanMaxValue)+1)
+            print(meanTicks)
             mean_cb = bmap.colorbar(mean_colormesh, ticks=meanTicks, location="right", shrink = 0.2)
             mean_cb.set_label("Mean salinity (psu)", fontsize=5)
             for t in mean_cb.ax.get_yticklabels():
@@ -254,6 +247,8 @@ if __name__ == "__main__":
             
             # colorbar STD
             stdTicks = numpy.arange(stdMinValue, stdMaxValue+0.1, 0.1)
+            print(stdTicks)
+            print(len(stdTicks))
             std_cb = fig.colorbar(std_colormesh, location='bottom', ticks = stdTicks, pad = -0.35, shrink = 0.5)
             std_cb.set_label("Spread", fontsize=5)
             for t in std_cb.ax.get_xticklabels():

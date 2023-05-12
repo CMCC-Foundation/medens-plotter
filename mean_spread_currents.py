@@ -199,7 +199,7 @@ if __name__ == "__main__":
                                    urcrnrlon=lons[-1],urcrnrlat=lats[-1], ax=ax)
                     
                     # contourf STD
-                    stdLevelsContourf = linspace(stdMinValue, stdMaxValue, num=stdLevels)
+                    stdLevelsContourf = linspace(stdMinValue, stdMaxValue, num=stdLevels+1)
                     std_data_0u =  ds1u.vozocrtx[timestep_index,depth_index,:,:].values
                     std_data_0v =  ds1v.vomecrty[timestep_index,depth_index,:,:].values
                     std_data = numpy.sqrt(std_data_0u ** 2 +  std_data_0v ** 2)
