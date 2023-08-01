@@ -3,7 +3,7 @@
 # set variables
 APP_NAME="[producePlots] === "
 VARIABLES=("ssh" "temperature" "currents" "salinity")
-LOG_PATH=/users_home/opa/medens-dev/operationalScripts/logs
+LOG_PATH=/work/opa/medens-dev/logs
 SCRIPT_PATH=/users_home/opa/$USER/operationalScripts/medens-plotter
 CONFIG_FILE="${SCRIPT_PATH}/config_zeus_dev.conf"
 
