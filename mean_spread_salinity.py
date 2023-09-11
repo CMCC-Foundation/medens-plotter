@@ -180,106 +180,117 @@ if __name__ == "__main__":
         # iterate over depth
         depth_index = 0
         for d in ds1.depth.values:
-            
-            # initialise the map
-            bmap = Basemap(resolution=resolution,
-                           llcrnrlon=lons[0],llcrnrlat=lats[0],
-                           urcrnrlon=lons[-1],urcrnrlat=lats[-1])
-            
-            fig, ax = plt.subplots()
-            
-            ############################################
-            #
-            # Mean
-            #
-            ############################################
 
-            # customize colormap
-            min_val, max_val = 0.15, 1.0
-            n = 10            
-            orig_cmap = cm.gist_rainbow
-            colors = orig_cmap(np.linspace(min_val, max_val, n))
-            cmap = cm.colors.LinearSegmentedColormap.from_list("mycmap", colors)
+            fig, axes = plt.subplots(nrows=2, ncols=1)
             
-            # contour MEAN
-            meanLevelsContour = linspace(meanMinValue, meanMaxValue, num=meanLevels)            
-            mean_data_0 =  ds2.vosaline[timestep_index,depth_index,:,:]
-            mean_data_1 = mean_data_0
-            mean_data = mean_data_1.values            
-            mean_colormesh = bmap.contour(xxx, yyy, mean_data, cmap=cmap, levels=meanLevelsContour, linewidths=0.15, extend='both', vmin=meanMinValue, vmax=meanMaxValue)
-            
-            ############################################
-            #
-            # Std
-            #
-            ############################################
-
-            # define the new colormap
-            max_percentage = 100
-            white_percentage = 10
-            white = np.array([256/256, 256/256, 256/256, 1])
-            reds = cm.get_cmap(stdColorMap, 256)
-            fv = reds(np.linspace(0, 1, max_percentage))
-            fv[:white_percentage, :] = white
-            fv[white_percentage:, :] = reds(np.linspace(0, 1, max_percentage-white_percentage))            
-            newcmp = ListedColormap(fv)
+            ax_index = 0
+            for ax in axes.flat:
+                    
+                if ax_index == 0:
                         
-            # contourf STD
-            stdLevelsContourf = linspace(stdMinValue, stdMaxValue, num=stdLevels+1)
-            std_data_0 =  ds1.vosaline[timestep_index,depth_index,:,:]
-            std_data_1 = std_data_0.where(((std_data_0.lat <= blackSeaMaskLat) | (std_data_0.lon <= blackSeaMaskLon)))
-            std_data = std_data_1.values
-            std_colormesh = bmap.contourf(xxx, yyy, std_data, cmap=newcmp, levels=stdLevelsContourf, extend='both')
-            
-            ############################################
-            #
-            # Colorbars
-            #
-            ############################################
-            
-            # colorbar MEAN
-            meanTicks = range(int(meanMinValue), int(meanMaxValue)+1)
-            print(meanTicks)
-            mean_cb = bmap.colorbar(mean_colormesh, ticks=meanTicks, location="right", shrink = 0.2)
-            mean_cb.set_label("Mean salinity (psu)", fontsize=5)
-            for t in mean_cb.ax.get_yticklabels():
-                t.set_fontsize(3)
-            
-            # colorbar STD
-            stdTicks = numpy.arange(stdMinValue, stdMaxValue+0.1, 0.1)
-            print(stdTicks)
-            print(len(stdTicks))
-            std_cb = fig.colorbar(std_colormesh, location='bottom', ticks = stdTicks, pad = -0.35, shrink = 0.5)
-            std_cb.set_label("Spread", fontsize=5)
-            for t in std_cb.ax.get_xticklabels():
-                t.set_fontsize(3)
-        
-            ############################################
-            #
-            # General configuration
-            #
-            ############################################            
+                    ############################################
+                    #
+                    # Mean
+                    #
+                    ############################################
+
+                    # initialise the map
+                    bmap = Basemap(resolution=resolution,
+                                   llcrnrlon=lons[0],llcrnrlat=lats[0],
+                                   urcrnrlon=lons[-1],urcrnrlat=lats[-1], ax=ax)
+                        
+                    # customize colormap
+                    min_val, max_val = 0.15, 1.0
+                    n = 10                        
+                    orig_cmap = cm.gist_rainbow
+                    colors = orig_cmap(np.linspace(min_val, max_val, n))
+                    cmap = cm.colors.LinearSegmentedColormap.from_list("mycmap", colors)
                 
-            # title
-            finalDate = "%s:30" % (d3.split(":")[0])
-            plt.title("Ensemble mean and spread for salinity at %s m.\nTimestep: %s" % (int(d), finalDate), fontsize = 5)
-                            
-            # draw coastlines, country boundaries, fill continents.
-            bmap.drawcoastlines(linewidth=0.15)
-            bmap.fillcontinents()
-            bmap.drawparallels(range(0, 90, 5), linewidth=0.1, labels=[1,0,0,1], fontsize=2)
-            bmap.drawmeridians(range(-90, 90, 5), linewidth=0.1, labels=[1,0,0,1], fontsize=2)
+                    # contour MEAN
+                    meanLevelsContour = linspace(meanMinValue, meanMaxValue, num=meanLevels)                        
+                    mean_data_0 =  ds2.vosaline[timestep_index,depth_index,:,:]
+                    mean_data_1 = mean_data_0
+                    mean_data = mean_data_1.values                        
+                    mean_colormesh = bmap.contour(xxx, yyy, mean_data, cmap=cmap, levels=meanLevelsContour, linewidths=0.15, extend='both', vmin=meanMinValue, vmax=meanMaxValue)
+
+                    # draw coastlines, country boundaries, fill continents.
+                    bmap.drawcoastlines(linewidth=0.25)
+                    bmap.fillcontinents(color="white")
+                    bmap.drawparallels(range(0, 90, 5), linewidth=0.1, labels=[1,0,0,1], fontsize=2)
+                    bmap.drawmeridians(range(-90, 90, 5), linewidth=0.1, labels=[1,0,0,1], fontsize=2)            
                 
-            # save file
+                    # colorbar MEAN
+                    meanTicks = range(int(meanMinValue), int(meanMaxValue)+1)
+                    mean_cb = bmap.colorbar(mean_colormesh, ticks=meanTicks, location="right", ax=ax)
+                    mean_cb.set_label("Mean salinity (psu)", fontsize=5)
+                    for t in mean_cb.ax.get_yticklabels():
+                        t.set_fontsize(3)
+                    
+                    # title
+                    finalDate = "%s:30" % (d3.split(":")[0])
+                    ax.set_title("Ensemble mean for salinity at %s m.\nTimestep: %s" % (int(d), finalDate), fontsize = 5)                                        
+                else:
+
+                    ############################################
+                    #
+                    # Std
+                    #
+                    ############################################
+                    
+                    # initialise the map
+                    bmap = Basemap(resolution=resolution,
+                                   llcrnrlon=lons[0],llcrnrlat=lats[0],
+                                   urcrnrlon=lons[-1],urcrnrlat=lats[-1], ax=ax)                
+                    
+                    # define the new colormap
+                    max_percentage = 100
+                    white_percentage = 10
+                    white = np.array([256/256, 256/256, 256/256, 1])
+                    reds = cm.get_cmap(stdColorMap, 256)
+                    fv = reds(np.linspace(0, 1, max_percentage))
+                    fv[:white_percentage, :] = white
+                    fv[white_percentage:, :] = reds(np.linspace(0, 1, max_percentage-white_percentage))                        
+                    newcmp = ListedColormap(fv)
+                                                
+                    # contourf STD
+                    stdLevelsContourf = linspace(stdMinValue, stdMaxValue, num=stdLevels+1)
+                    std_data_0 =  ds1.vosaline[timestep_index,depth_index,:,:]
+                    std_data_1 = std_data_0.where(((std_data_0.lat <= blackSeaMaskLat) | (std_data_0.lon <= blackSeaMaskLon)))
+                    std_data = std_data_1.values
+                    std_colormesh = bmap.contourf(xxx, yyy, std_data, cmap=newcmp, levels=stdLevelsContourf, extend='both')
+                    
+                    # colorbar STD
+                    stdTicks = numpy.arange(stdMinValue, stdMaxValue+0.1, 0.1)
+                    std_cb = bmap.colorbar(std_colormesh, ticks = stdTicks, ax=ax, shrink=0.6, location="right")
+                    std_cb.set_label("Spread", fontsize=5)
+                    for t in std_cb.ax.get_yticklabels():
+                        t.set_fontsize(3)
+
+                    # draw coastlines, country boundaries, fill continents.
+                    bmap.drawcoastlines(linewidth=0.25)
+                    bmap.fillcontinents(color="white")
+                    bmap.drawparallels(range(0, 90, 5), linewidth=0.1, labels=[1,0,0,1], fontsize=2)
+                    bmap.drawmeridians(range(-90, 90, 5), linewidth=0.1, labels=[1,0,0,1], fontsize=2)            
+                   
+                    # title
+                    finalDate = "%s:30" % (d3.split(":")[0])
+                    ax.set_title("Ensemble spread for salinity at %s m.\nTimestep: %s" % (int(d), finalDate), fontsize = 5)
+
+                ax_index += 1
+                
+            # Adjust spacing between subplots
+            plt.tight_layout()
+                
+            # save file            
             di = ds1.depth.values.tolist().index(d)
             filename = os.path.join(dst, outputFileTemplate.format(DATE=d4, DEPTH=di))
             plt.savefig(filename, dpi=300, bbox_inches="tight")
             print("File %s generated" % filename)
-
+                
             # clear memory
             fig.clear()
             plt.close(fig)
-
+                
             # increment depth_index
             depth_index += 1
 
