@@ -176,91 +176,107 @@ if __name__ == "__main__":
         if day_current_index != day_index:
             timestep_index += 1
             continue
-    
-        # initialise the map
-        bmap = Basemap(resolution=resolution,
-                       llcrnrlon=lons[0],llcrnrlat=lats[0],
-                       urcrnrlon=lons[-1],urcrnrlat=lats[-1])
 
-        fig, ax = plt.subplots()
-        
-        ############################################
-        #
-        # Mean
-        #
-        ############################################
 
-        # customize colormap
-        min_val, max_val = 0.2, 1.0
-        n = 10            
-        orig_cmap = cm.gist_rainbow
-        colors = orig_cmap(np.linspace(min_val, max_val, n))
-        cmap = cm.colors.LinearSegmentedColormap.from_list("mycmap", colors)
-        
-        # contour MEAN
-        meanLevelsContour = linspace(meanMinValue, meanMaxValue, num=meanLevels)            
-        mean_data_0 =  ds2.sossheig[timestep_index,:,:]
-        mean_data = mean_data_0.values            
-        mean_colormesh = ax.contour(xxx, yyy, mean_data, cmap=cmap, levels=meanLevelsContour, linewidths=0.2, vmin=meanMinValue, vmax=meanMaxValue, extend='both')
-
-        ############################################
-        #
-        # Std
-        #
-        ############################################
-
-        max_percentage = 100
-        white_percentage = 20
-        white = np.array([256/256, 256/256, 256/256, 1])
-        reds = cm.get_cmap(stdColorMap, 256)
-        fv = reds(np.linspace(0, 1, max_percentage))
-        fv[:white_percentage, :] = white
-        fv[white_percentage:, :] = reds(np.linspace(0, 1, max_percentage-white_percentage))
-        newcmp = ListedColormap(fv)
-        
-        # contourf STD
-        stdLevelsContourf = linspace(stdMinValue, stdMaxValue, num=stdLevels)
-        std_data_0 =  ds1.sossheig[timestep_index,:,:]
-        std_data_1 = std_data_0.where((std_data_0.lat <= blackSeaMaskLat) | (std_data_0.lon <= blackSeaMaskLon))     
-        std_data = std_data_1.values
-        std_colormesh = ax.contourf(xxx, yyy, std_data, cmap=newcmp, extend='max', levels=stdLevelsContourf, vmin=stdMinValue, vmax=stdMaxValue)
-
-        ############################################
-        #
-        # Colorbars
-        #
-        ############################################
-        
-        # colorbar MEAN
-        meanTicks = range(int(meanMinValue), int(meanMaxValue)+1)
-        mean_cb = bmap.colorbar(mean_colormesh, ticks=meanTicks, location="right", shrink=0.2)
-        mean_cb.set_label("Mean ssh (m)", fontsize=5)
-        for t in mean_cb.ax.get_yticklabels():
-            t.set_fontsize(3)
-        
-        # colorbar STD
-        stdTicks = numpy.arange(stdMinValue, stdMaxValue+0.05, 0.05)
-        std_cb = fig.colorbar(std_colormesh, location='bottom', pad = -0.35, shrink = 0.5, ticks = stdTicks)
-        std_cb.set_label("Spread", fontsize=5)
-        for t in std_cb.ax.get_xticklabels():
-            t.set_fontsize(3)
-    
-        ############################################
-        #
-        # General configuration
-        #
-        ############################################            
+        fig, axes = plt.subplots(nrows=2, ncols=1)
             
-        # title
-        finalDate = "%s:30" % (d3.split(":")[0])
-        plt.title("Ensemble mean and spread for ssh.\nTimestep: %s" % (finalDate), fontsize = 5)
-                        
-        # draw coastlines, country boundaries, fill continents.
-        bmap.drawcoastlines(linewidth=0.15)
-        bmap.fillcontinents()
-        bmap.drawparallels(range(0, 90, 5), linewidth=0.1, labels=[1,0,0,1], fontsize=2)
-        bmap.drawmeridians(range(-90, 90, 5), linewidth=0.1, labels=[1,0,0,1], fontsize=2)
+        ax_index = 0
+        for ax in axes.flat:
             
+            if ax_index == 0:
+                       
+                ############################################
+                #
+                # Mean
+                #
+                ############################################
+                
+                # initialise the map
+                bmap = Basemap(resolution=resolution,
+                               llcrnrlon=lons[0],llcrnrlat=lats[0],
+                               urcrnrlon=lons[-1],urcrnrlat=lats[-1], ax=ax)
+
+                # customize colormap
+                min_val, max_val = 0.2, 1.0
+                n = 10            
+                orig_cmap = cm.gist_rainbow
+                colors = orig_cmap(np.linspace(min_val, max_val, n))
+                cmap = cm.colors.LinearSegmentedColormap.from_list("mycmap", colors)
+                
+                # contour MEAN
+                meanLevelsContour = linspace(meanMinValue, meanMaxValue, num=meanLevels)            
+                mean_data_0 =  ds2.sossheig[timestep_index,:,:]
+                mean_data = mean_data_0.values            
+                mean_colormesh = ax.contour(xxx, yyy, mean_data, cmap=cmap, levels=meanLevelsContour, linewidths=0.2, vmin=meanMinValue, vmax=meanMaxValue, extend='both')
+                
+                # colorbar MEAN
+                meanTicks = range(int(meanMinValue), int(meanMaxValue)+1)
+                mean_cb = bmap.colorbar(mean_colormesh, ticks=meanTicks, location="right", shrink=0.2)
+                mean_cb.set_label("Mean ssh (m)", fontsize=5)
+                for t in mean_cb.ax.get_yticklabels():
+                    t.set_fontsize(3)
+                
+                # title
+                # finalDate = "%s:30" % (d3.split(":")[0])
+                finalDate = d1
+                plt.title("Ensemble mean for ssh\nTimestep: %s" % (finalDate), fontsize = 5)
+                                
+                # draw coastlines, country boundaries, fill continents.
+                bmap.drawcoastlines(linewidth=0.15)
+                bmap.fillcontinents()
+                bmap.drawparallels(range(0, 90, 5), linewidth=0.1, labels=[1,0,0,1], fontsize=2)
+                bmap.drawmeridians(range(-90, 90, 5), linewidth=0.1, labels=[1,0,0,1], fontsize=2)
+
+            else:
+                
+                ############################################
+                #
+                # Std
+                #
+                ############################################
+
+                # initialise the map
+                bmap = Basemap(resolution=resolution,
+                               llcrnrlon=lons[0],llcrnrlat=lats[0],
+                               urcrnrlon=lons[-1],urcrnrlat=lats[-1], ax=ax)
+
+                # customise the colormap
+                max_percentage = 100
+                white_percentage = 20
+                white = np.array([256/256, 256/256, 256/256, 1])
+                reds = cm.get_cmap(stdColorMap, 256)
+                fv = reds(np.linspace(0, 1, max_percentage))
+                fv[:white_percentage, :] = white
+                fv[white_percentage:, :] = reds(np.linspace(0, 1, max_percentage-white_percentage))
+                newcmp = ListedColormap(fv)
+                
+                # contourf STD
+                stdLevelsContourf = linspace(stdMinValue, stdMaxValue, num=stdLevels)
+                std_data_0 =  ds1.sossheig[timestep_index,:,:]
+                std_data_1 = std_data_0.where((std_data_0.lat <= blackSeaMaskLat) | (std_data_0.lon <= blackSeaMaskLon))     
+                std_data = std_data_1.values
+                std_colormesh = ax.contourf(xxx, yyy, std_data, cmap=newcmp, extend='max', levels=stdLevelsContourf, vmin=stdMinValue, vmax=stdMaxValue)
+
+                # colorbar STD
+                stdTicks = numpy.arange(stdMinValue, stdMaxValue+0.05, 0.05)
+                std_cb = bmap.colorbar(std_colormesh, location='right', shrink = 0.5, ticks = stdTicks)
+                std_cb.set_label("Spread", fontsize=5)
+                for t in std_cb.ax.get_yticklabels():
+                    t.set_fontsize(3)
+
+                # title
+                # finalDate = "%s:30" % (d3.split(":")[0])
+                finalDate = d1
+                plt.title("Ensemble spread for ssh\nTimestep: %s" % (finalDate), fontsize = 5)
+                                
+                # draw coastlines, country boundaries, fill continents.
+                bmap.drawcoastlines(linewidth=0.15)
+                bmap.fillcontinents()
+                bmap.drawparallels(range(0, 90, 5), linewidth=0.1, labels=[1,0,0,1], fontsize=2)
+                bmap.drawmeridians(range(-90, 90, 5), linewidth=0.1, labels=[1,0,0,1], fontsize=2)
+                                
+            ax_index += 1
+                
         # save file
         filename = os.path.join(dst, outputFileTemplate.format(DATE=d4))
         plt.savefig(filename, dpi=300, bbox_inches="tight")
