@@ -227,8 +227,9 @@ if __name__ == "__main__":
                         t.set_fontsize(3)
                     
                     # title
-                    finalDate = "%s:30" % (d3.split(":")[0])
-                    ax.set_title("Ensemble mean for salinity at %s m.\nTimestep: %s" % (int(d), finalDate), fontsize = 5)                                        
+                    # finalDate = "%s:30" % (d3.split(":")[0])
+                    finalDate = d1
+                    ax.set_title("Ensemble mean for salinity at %s m\nTimestep: %s" % (int(d), finalDate), fontsize = 5)                                        
                 else:
 
                     ############################################
@@ -273,8 +274,9 @@ if __name__ == "__main__":
                     bmap.drawmeridians(range(-90, 90, 5), linewidth=0.1, labels=[1,0,0,1], fontsize=2)            
                    
                     # title
-                    finalDate = "%s:30" % (d3.split(":")[0])
-                    ax.set_title("Ensemble spread for salinity at %s m.\nTimestep: %s" % (int(d), finalDate), fontsize = 5)
+                    # finalDate = "%s:30" % (d3.split(":")[0])
+                    finalDate = d1
+                    ax.set_title("Ensemble spread for salinity at %s m\nTimestep: %s" % (int(d), finalDate), fontsize = 5)
 
                 ax_index += 1
                 
