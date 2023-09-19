@@ -210,7 +210,7 @@ if __name__ == "__main__":
                     # colorbar STD
                     stdTicks = numpy.arange(stdMinValue, stdMaxValue+0.1, 0.1)
                     std_cb = bmap.colorbar(std_colormesh, location='right', ticks = stdTicks, ax=ax)
-                    std_cb.set_label("Spread", fontsize=5)
+                    std_cb.set_label("Spread (m/s)", fontsize=5)
                     for t in std_cb.ax.get_yticklabels():
                         t.set_fontsize(3)
 
@@ -221,8 +221,8 @@ if __name__ == "__main__":
                     bmap.drawmeridians(range(-90, 90, 5), linewidth=0.1, labels=[1,0,0,1], fontsize=2)
 
                     # title
-                    finalDate = "%s:30" % (d3.split(":")[0])
-                    ax.set_title("Ensemble spread for currents.\nTimestep: %s" % (finalDate), fontsize = 5)
+                    finalDate = d1 # "%s:30" % (d3.split(":")[0])
+                    ax.set_title("Ensemble spread for currents.\nDaily mean: %s" % (finalDate), fontsize = 5)
                         
                 else:
                     
@@ -262,9 +262,9 @@ if __name__ == "__main__":
                     bmap.drawmeridians(range(-90, 90, 5), linewidth=0.1, labels=[1,0,0,1], fontsize=2)
 
                     # title
-                    finalDate = "%s:30" % (d3.split(":")[0])
-                    ax.set_title("Ensemble mean for currents.\nTimestep: %s" % (finalDate), fontsize = 5)
-            
+                    finalDate = d1 # "%s:30" % (d3.split(":")[0])
+                    ax.set_title("Ensemble mean for currents.\nDaily mean: %s" % (finalDate), fontsize = 5)
+                    
                     # Mean vector
                     
                     u = ds2u.vozocrtx[timestep_index,depth_index,::,::].values

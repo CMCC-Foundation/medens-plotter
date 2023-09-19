@@ -226,7 +226,10 @@ if __name__ == "__main__":
                     stdMaxValue = stdMaxValues_bott[int(month)+1]       
                 
                 if ax_index == 0:
-    
+
+                    # meanMinValue = numpy.min(ds2.votemper[timestep_index,depth_index,:,:])
+                    # meanMaxValue = numpy.max(ds2.votemper[timestep_index,depth_index,:,:])
+                    
                     ############################################
                     #
                     # Mean
@@ -244,14 +247,29 @@ if __name__ == "__main__":
                     orig_cmap = cm.gist_rainbow
                     colors = orig_cmap(np.linspace(min_val, max_val, n))
                     cmap = cm.colors.LinearSegmentedColormap.from_list("mycmap", colors)
-        
-                    # contour MEAN
-                    meanLevelsContour = linspace(meanMinValue, meanMaxValue, num=meanLevels)            
+                    cmap = meanColorMap
+
+                    # set adaptive min and max
+                    meanMinValue = numpy.nanmin(ds2.votemper[timestep_index,depth_index,:,:])
+                    meanMaxValue = numpy.nanmax(ds2.votemper[timestep_index,depth_index,:,:])
+                    
+                    # get the mean -- part 1                
                     mean_data_0 =  ds2.votemper[timestep_index,depth_index,:,:]
-                    mean_data_1 = mean_data_0.where(mean_data_0 >= meanMinValue, other=meanMinValue).where(mean_data_0 <= meanMaxValue, other=meanMaxValue)
-                    mean_data = mean_data_1.values                        
-                    mean_colormesh = bmap.contour(xxx, yyy, mean_data, cmap=cmap, levels=meanLevelsContour, linewidths=0.15, vmin=meanMinValue, vmax=meanMaxValue, extend='both')
-        
+                    mean_data_1 = mean_data_0.where(mean_data_0 > 0, other=np.nan)
+                  
+                    # get the mean -- mask the black sea -- part 2
+                    mean_data_2 = mean_data_1.where((mean_data_1['lat'] <= blackSeaMaskLat) | (mean_data_1['lon'] <= blackSeaMaskLon), np.nan)                    
+                    mean_data = mean_data_2.values
+
+                    # set adaptive min and max
+                    meanMinValue = numpy.nanmin(mean_data_2.values)
+                    meanMaxValue = numpy.nanmax(mean_data_2.values)
+                    
+                    # contour range
+                    meanLevelsContour = linspace(meanMinValue, meanMaxValue, num=meanLevels)            
+                    
+                    mean_colormesh = bmap.contourf(xxx, yyy, mean_data, cmap=cmap, levels=meanLevelsContour, linewidths=0.15, vmin=meanMinValue, vmax=meanMaxValue, extend='both')
+                    
                     # colorbar MEAN
                     meanTicks = range(int(meanMinValue), int(meanMaxValue)+1)
                     mean_cb = bmap.colorbar(mean_colormesh, ticks=meanTicks, location='right')
@@ -268,7 +286,7 @@ if __name__ == "__main__":
                     # title
                     # finalDate = "%s:30" % (d3.split(":")[0])
                     finalDate = d1
-                    plt.title("Ensemble mean for Sea temperature at %s m\nTimestep: %s" % (int(d), finalDate), fontsize = 5)
+                    plt.title("Ensemble mean for Sea temperature at %s m\nDaily mean: %s" % (int(d), finalDate), fontsize = 5)
                     
                 else:
                         
@@ -292,7 +310,7 @@ if __name__ == "__main__":
                     fv[:white_percentage, :] = white
                     fv[white_percentage:, :] = reds(np.linspace(0, 1, max_percentage-white_percentage))
                     newcmp = ListedColormap(fv)
-                    
+
                     # contourf STD
                     stdLevelsContourf = linspace(stdMinValue, stdMaxValue, num=stdLevels+1)
                     std_data_0 =  ds1.votemper[timestep_index,depth_index,:,:]
@@ -303,14 +321,14 @@ if __name__ == "__main__":
                     # colorbar STD
                     stdTicks = numpy.arange(stdMinValue, stdMaxValue+0.1, 0.1)
                     std_cb = bmap.colorbar(std_colormesh, location='right', ticks = stdTicks, shrink = 0.5)
-                    std_cb.set_label("Spread", fontsize=5)
+                    std_cb.set_label("Spread (degC)", fontsize=5)
                     for t in std_cb.ax.get_yticklabels():
                         t.set_fontsize(3)
                             
                     # title
                     # finalDate = "%s:30" % (d3.split(":")[0])
                     finalDate = d1
-                    plt.title("Ensemble spread for Sea temperature at %s m\nTimestep: %s" % (int(d), finalDate), fontsize = 5)
+                    plt.title("Ensemble spread for Sea temperature at %s m\nDaily mean: %s" % (int(d), finalDate), fontsize = 5)
                     
                     # draw coastlines, country boundaries, fill continents.
                     bmap.drawcoastlines(linewidth=0.15)

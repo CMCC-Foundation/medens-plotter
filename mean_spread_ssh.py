@@ -219,7 +219,7 @@ if __name__ == "__main__":
                 # title
                 # finalDate = "%s:30" % (d3.split(":")[0])
                 finalDate = d1
-                plt.title("Ensemble mean for ssh\nTimestep: %s" % (finalDate), fontsize = 5)
+                plt.title("Ensemble mean for ssh\nDaily mean: %s" % (finalDate), fontsize = 5)
                                 
                 # draw coastlines, country boundaries, fill continents.
                 bmap.drawcoastlines(linewidth=0.15)
@@ -249,25 +249,34 @@ if __name__ == "__main__":
                 fv[:white_percentage, :] = white
                 fv[white_percentage:, :] = reds(np.linspace(0, 1, max_percentage-white_percentage))
                 newcmp = ListedColormap(fv)
-                
-                # contourf STD
-                stdLevelsContourf = linspace(stdMinValue, stdMaxValue, num=stdLevels)
+
+                # get the data
                 std_data_0 =  ds1.sossheig[timestep_index,:,:]
                 std_data_1 = std_data_0.where((std_data_0.lat <= blackSeaMaskLat) | (std_data_0.lon <= blackSeaMaskLon))     
                 std_data = std_data_1.values
-                std_colormesh = ax.contourf(xxx, yyy, std_data, cmap=newcmp, extend='max', levels=stdLevelsContourf, vmin=stdMinValue, vmax=stdMaxValue)
+                
+                # determine adaptive min/max
+                stdMinValue = numpy.nanmin(std_data_1.values)
+                stdMaxValue = numpy.nanmax(std_data_1.values)
+                print(stdMinValue)
+                print(stdMaxValue)
+                
+                # contourf STD
+                stdLevelsContourf = linspace(stdMinValue, stdMaxValue, num=stdLevels)
+                # std_colormesh = ax.contourf(xxx, yyy, std_data, cmap=newcmp, levels=stdLevelsContourf, vmin=stdMinValue, vmax=stdMaxValue)
+                std_colormesh = ax.contourf(xxx, yyy, std_data, cmap=stdColorMap, levels=stdLevelsContourf, vmin=stdMinValue, vmax=stdMaxValue)
 
                 # colorbar STD
                 stdTicks = numpy.arange(stdMinValue, stdMaxValue+0.05, 0.05)
                 std_cb = bmap.colorbar(std_colormesh, location='right', shrink = 0.5, ticks = stdTicks)
-                std_cb.set_label("Spread", fontsize=5)
+                std_cb.set_label("Spread (m)", fontsize=5)
                 for t in std_cb.ax.get_yticklabels():
                     t.set_fontsize(3)
 
                 # title
                 # finalDate = "%s:30" % (d3.split(":")[0])
                 finalDate = d1
-                plt.title("Ensemble spread for ssh\nTimestep: %s" % (finalDate), fontsize = 5)
+                plt.title("Ensemble spread for ssh\nDaily mean: %s" % (finalDate), fontsize = 5)
                                 
                 # draw coastlines, country boundaries, fill continents.
                 bmap.drawcoastlines(linewidth=0.15)

@@ -198,8 +198,8 @@ if __name__ == "__main__":
             t.set_fontsize(1)
         
         # title
-        finalDate = "%s:30" % (d3.split(":")[0])
-        plt.suptitle("Sea Surface Height.\nTimestep: %s" % (finalDate), fontsize = 5)
+        finalDate = d1 # "%s:30" % (d3.split(":")[0])
+        plt.suptitle("Sea Surface Height.\nDaily mean: %s" % (finalDate), fontsize = 5)
             
         # save file
         filename = os.path.join(dst, outputFileTemplate.format(DATE=d4))        

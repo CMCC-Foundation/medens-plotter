@@ -55,6 +55,7 @@ source $TELEGRAM_CONFIG_FILE
 
 # set variables
 VARIABLES=("ssh" "temperature" "currents" "salinity")
+# VARIABLES=("temperature")
 
 # set paths
 SCRIPT_PATH=$PLOTTER_BASE_PATH
@@ -79,7 +80,7 @@ bsub () {
 }   
 
 # iterate over the days for mean spread plots
-for DAY in $(seq 0 8); do
+for DAY in $(seq 1 11); do
 
     # debug print
     echo "$APPNAME Day $DAY"

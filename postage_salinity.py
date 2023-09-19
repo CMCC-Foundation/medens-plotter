@@ -159,9 +159,12 @@ if __name__ == "__main__":
         # iterate over depth
         depth_index = 0
         for d in datasets[0].deptht:
-            
+
             fig, axes = plt.subplots(nrows=5, ncols=2, frameon=True)
-                        
+
+            minValue = configParser.getfloat("postcardSalinity", "minValue")
+            maxValue = configParser.getfloat("postcardSalinity", "maxValue")
+            
             ax_index = 0
             for ax in axes.flat:
 
@@ -172,8 +175,20 @@ if __name__ == "__main__":
 
                 # contourf                
                 mean_data_0 = datasets[ax_index].vosaline[timestep_index,depth_index,:,:]                
-                mean_data = mean_data_0.where(((mean_data_0.nav_lat <= blackSeaMaskLat) | (mean_data_0.nav_lon <= blackSeaMaskLon)))
-                
+                mean_data_1 = mean_data_0.where(mean_data_0 > 0, other=np.nan)
+                mean_data_2 = mean_data_1.where((mean_data_1['nav_lat'] <= blackSeaMaskLat) | (mean_data_1['nav_lon'] <= blackSeaMaskLon), np.nan)
+                mean_data = mean_data_2.values
+
+                # # set adaptive min and max
+                # minValue = numpy.nanmin(mean_data_2.values)
+                # maxValue = numpy.nanmax(mean_data_2.values)
+
+                if numpy.nanmin(mean_data_2.values) < minValue:
+                    minValue = numpy.nanmin(mean_data_2.values)
+                if numpy.nanmax(mean_data_2.values) < maxValue:
+                    maxValue = numpy.nanmax(mean_data_2.values)
+                                    
+                # draw
                 contour_levels = linspace(minValue, maxValue, levels)
                 im = ax.contourf(xxx, yyy, mean_data, cmap=colorMap, levels=contour_levels, extend='both')
                 ax.set_title("Member %s" % ax_index, fontsize = 5, pad = 4)
@@ -195,8 +210,8 @@ if __name__ == "__main__":
                 t.set_fontsize(1)
             
             # title
-            finalDate = "%s:30" % (d3.split(":")[0])
-            plt.suptitle("Salinity at %s m.\nTimestep: %s" % (int(d), finalDate), fontsize = 5)
+            finalDate = d1 # "%s:30" % (d3.split(":")[0])
+            plt.suptitle("Salinity at %s m.\nDaily mean: %s" % (int(d), finalDate), fontsize = 5)
                 
             # save file
             di = datasets[0].deptht.values.tolist().index(d)

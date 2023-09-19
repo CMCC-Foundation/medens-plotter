@@ -165,16 +165,20 @@ if __name__ == "__main__":
         depth_index = 0
         for d in datasets[0].deptht:
             
-            if depth_index < 2:
-                minValue = minValue_surf
-                maxValue = maxValue_surf
-            else:
-                minValue = minValue_bott
-                maxValue = maxValue_bott
-                
+            # if depth_index < 2:
+            #     minValue = minValue_surf
+            #     maxValue = maxValue_surf
+            # else:
+            #     minValue = minValue_bott
+            #     maxValue = maxValue_bott
+            
             fig, axes = plt.subplots(nrows=5, ncols=2)
             
             ax_index = 0
+
+            minValue = numpy.min(datasets[ax_index].votemper[timestep_index,depth_index,:,:])
+            maxValue = numpy.max(datasets[ax_index].votemper[timestep_index,depth_index,:,:])
+            
             for ax in axes.flat:
                 # create basemap
                 bmap = Basemap(resolution=resolution,
@@ -183,7 +187,15 @@ if __name__ == "__main__":
 
                 # contourf
                 mean_data_0 = datasets[ax_index].votemper[timestep_index,depth_index,:,:]
-                mean_data = mean_data_0.where(((mean_data_0.nav_lat <= blackSeaMaskLat) | (mean_data_0.nav_lon <= blackSeaMaskLon)))                
+                mean_data_1 = mean_data_0.where(((mean_data_0.nav_lat <= blackSeaMaskLat) | (mean_data_0.nav_lon <= blackSeaMaskLon)))
+                mean_data_2 = mean_data_1.where(mean_data_1 > 0, other=np.nan)
+                mean_data = mean_data_2
+                  
+                # get the mean -- mask the black sea -- part 2
+                # mean_data_2 = mean_data_1.where((mean_data_1['lat'] <= blackSeaMaskLat) | (mean_data_1['lon'] <= blackSeaMaskLon), np.nan)                    
+
+                minValue = numpy.nanmin(mean_data_2.values)
+                
                 contour_levels = linspace(minValue, maxValue, levels)
                 im = ax.contourf(xxx, yyy, mean_data, cmap=colorMap, levels=contour_levels, extend='both')
                 
@@ -206,8 +218,8 @@ if __name__ == "__main__":
                 t.set_fontsize(1)
             
             # title
-            finalDate = "%s:30" % (d3.split(":")[0])
-            plt.suptitle("Temperature at %s m.\nTimestep: %s" % (int(d), finalDate), fontsize = 5)
+            finalDate = d1 # "%s:30" % (d3.split(":")[0])
+            plt.suptitle("Temperature at %s m\nDaily mean: %s" % (int(d), finalDate), fontsize = 5)
                 
             # save file
             di = datasets[0].deptht.values.tolist().index(d)

@@ -152,6 +152,7 @@ if __name__ == "__main__":
         d1 = str(t.values).split("T")[0]        
         d3 = "%s, 12:30" % (d1)
         d4 = "%s_1230" % (d1)
+        # d4 = d1
 
         # debug print
         print("[%s] -- Timestep: %s" % (appname, d3))
@@ -202,10 +203,10 @@ if __name__ == "__main__":
             
             # title
             finalDate = "%s:30" % (d3.split(":")[0])
-            plt.suptitle("Currents at %s m.\nTimestep: %s" % (int(d), finalDate), fontsize = 5)
+            plt.suptitle("Currents at %s m.\nDaily mean: %s" % (int(d), d1), fontsize = 5)
                 
             # save file
-            di = datasetsU[0].depthu.values.tolist().index(d)
+            di = datasetsU[0].depthu.values.tolist().index(d)            
             filename = os.path.join(dst, outputFileTemplate.format(DATE=d4, DEPTH=di))                    
             plt.savefig(filename, dpi=300, bbox_inches="tight")
             print("File %s generated" % filename)
